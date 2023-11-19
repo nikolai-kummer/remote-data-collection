@@ -10,6 +10,7 @@ const char PASS[]     = SECRET_OPTIONAL_PASS;    // Network password (use for WP
 CloudAcceleration accel_X;
 CloudAcceleration accel_Y;
 CloudAcceleration accel_Z;
+int battery;
 CloudLocation gps;
 
 void initProperties(){
@@ -17,6 +18,7 @@ void initProperties(){
   ArduinoCloud.addProperty(accel_X, READ, 10 * SECONDS, NULL);
   ArduinoCloud.addProperty(accel_Y, READ, 10 * SECONDS, NULL);
   ArduinoCloud.addProperty(accel_Z, READ, 10 * SECONDS, NULL);
+  ArduinoCloud.addProperty(battery, READ, 10 * SECONDS, NULL);
   ArduinoCloud.addProperty(gps, READ, 10 * SECONDS, NULL);
 
 }

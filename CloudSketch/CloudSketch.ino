@@ -164,7 +164,7 @@ void setup()
 
   // Defined in thingProperties.h
   initProperties();
-  // initGPS();
+  //initGPS();
   initIMU();
 
   // Connect to Arduino IoT Cloud
@@ -218,8 +218,10 @@ void loop()
   Serial.println("%");
   battery = batterypercent;
 
-  // check if there is new GPS data available
-  /*if (GPS.available()) {
+  gps = {53.525, -113.5275};
+
+  /*// check if there is new GPS data available
+  if (GPS.available()) {
     // read GPS values
     float latitude   = GPS.latitude();
     float longitude  = GPS.longitude();
@@ -228,6 +230,7 @@ void loop()
     int   satellites = GPS.satellites();
 
     gps = {latitude, longitude};
+
 
     // print GPS values
     Serial.print("Location: ");

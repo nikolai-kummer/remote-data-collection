@@ -13,6 +13,41 @@
 
 #include <Arduino_MKRGPS.h>
 
+#include <ctime>
+#include <Arduino.h>
+
+void printDateTime(unsigned long epochTime) {
+    // Convert epoch time to time_t object
+    time_t rawTime = (time_t)epochTime;
+
+    // Convert to tm struct for breaking down into year, month, etc.
+    struct tm * timeInfo;
+    timeInfo = gmtime(&rawTime);
+
+    // Extract year, month, day, hour, minute, second
+    int year = timeInfo->tm_year + 1900; // tm_year is years since 1900
+    int month = timeInfo->tm_mon + 1;    // tm_mon is months since January (0-11)
+    int day = timeInfo->tm_mday;
+    int hour = timeInfo->tm_hour;
+    int minute = timeInfo->tm_min;
+    int second = timeInfo->tm_sec;
+
+    // Print the date and time
+    Serial.print("Date and Time: ");
+    Serial.print(year);
+    Serial.print("-");
+    Serial.print(month);
+    Serial.print("-");
+    Serial.print(day);
+    Serial.print(" ");
+    Serial.print(hour);
+    Serial.print(":");
+    Serial.print(minute);
+    Serial.print(":");
+    Serial.println(second);
+}
+
+
 void setup() {
   // initialize serial communications and wait for port to open:
   Serial.begin(9600);
@@ -55,9 +90,14 @@ void loop() {
     Serial.print("Number of satellites: ");
     Serial.println(satellites);
 
+    // Get GPS time
+    unsigned long time = GPS.getTime(); // This might return time in HHMMSSCC format
+    Serial.print("Epoch time: ");
+    Serial.println(time);    
+
+    printDateTime(time);
+    
+    
     Serial.println();
   }
-
-  Serial.println('waiting');
-  delay(1000);
 }

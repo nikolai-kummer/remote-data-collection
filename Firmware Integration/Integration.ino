@@ -37,6 +37,7 @@ int status = WL_IDLE_STATUS; // the WiFi radio's status
 
 void setup()
 {
+    Serial.begin(9600);
     initGPS();
     initWIFI();
     initIMU();
@@ -44,13 +45,55 @@ void setup()
 
 void loop()
 {
-    // put your main code here, to run repeatedly:
+
+    // Get current battery power level and print it
+    int sensorValue = analogRead(ADC_BATTERY);
+    // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 4.3V):
+    float voltage = sensorValue * (4.3 / 1023.0);
+    // print out the value you read:
+    Serial.print(voltage);
+    Serial.println("V");
+
+    // Checking if a gps reading is available, reading it, ensuring its valid, then printing it
+    while (GPS.available() > 0)
+    {
+        GPS.read();
+        if (GPS.location.isValid())
+        {
+            Serial.print("Latitude: ");
+            Serial.println(GPS.location.lat(), 6);
+            Serial.print("Longitude: ");
+            Serial.println(GPS.location.lng(), 6);
+        }
+        else
+        {
+            Serial.println("GPS data not available");
+        }
+    }
 }
+
+// gathering the IMU data
+sensors_event_t accel, gyro;
+
+icm.getEvent(&accel, &gyro, NULL);
+
+Serial.print("Accelerometer (m/s^2): ");
+Serial.print(accel.acceleration.x);
+Serial.print(", ");
+Serial.print(accel.acceleration.y);
+Serial.print(", ");
+Serial.println(accel.acceleration.z);
+
+Serial.print("Gyroscope (rad/s): ");
+Serial.print(gyro.gyro.x);
+Serial.print(", ");
+Serial.print(gyro.gyro.y);
+Serial.print(", ");
+Serial.println(gyro.gyro.z);
 
 void initGPS()
 {
     // initialize serial communications and wait for port to open:
-    Serial.begin(9600);
     while (!Serial)
     {
         ; // wait for serial port to connect. Needed for native USB port only
@@ -69,7 +112,6 @@ void initGPS()
 void initWIFI()
 {
     // Initialize serial and wait for port to open:
-    Serial.begin(9600);
     while (!Serial)
     {
         ; // wait for serial port to connect. Needed for native USB port only
@@ -166,7 +208,6 @@ void printMacAddress(byte mac[])
 
 void initIMU()
 {
-    Serial.begin(115200);
     while (!Serial)
         delay(10); // will pause Zero, Leonardo, etc until serial console opens
 

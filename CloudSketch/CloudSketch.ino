@@ -39,23 +39,21 @@ uint16_t measurement_delay_us = 65535; // Delay between measurements for testing
 #define ICM_MISO 12
 #define ICM_MOSI 11
 
-void initGPS()
+/*void initGPS()
 {
   // initialize serial communications and wait for port to open:
-  while (!Serial)
-  {
+  Serial.begin(9600);
+  while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
 
   // If you are using the MKR GPS as shield, change the next line to pass
   // the GPS_MODE_SHIELD parameter to the GPS.begin(...)
-  if (!GPS.begin(GPS_MODE_SHIELD))
-  {
+  if (!GPS.begin(GPS_MODE_SHIELD)) {
     Serial.println("Failed to initialize GPS!");
-    while (1)
-      ;
+    while (1);
   }
-}
+  */
 
 void initIMU()
 {
@@ -159,13 +157,27 @@ void setup()
 {
   // Initialize serial and wait for port to open:
   Serial.begin(9600);
-  // This delay gives the chance to wait for a Serial Monitor without blocking if none is found
-  delay(1500);
 
   // Defined in thingProperties.h
   initProperties();
-  //initGPS();
-  initIMU();
+
+  // initialize serial communications and wait for port to open:
+  Serial.begin(9600);
+  while (!Serial)
+  {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+
+  // If you are using the MKR GPS as shield, change the next line to pass
+  // the GPS_MODE_SHIELD parameter to the GPS.begin(...)
+  if (!GPS.begin(GPS_MODE_SHIELD))
+  {
+    Serial.println("Failed to initialize GPS!");
+    while (1)
+      ;
+  }
+
+  // initIMU();
 
   // Connect to Arduino IoT Cloud
   ArduinoCloud.begin(ArduinoIoTPreferredConnection);
@@ -183,9 +195,11 @@ void setup()
 
 void loop()
 {
-  ArduinoCloud.update();
   // Your code here
+  ArduinoCloud.update();
   //  /* Get a new normalized sensor event */
+
+  /*
   sensors_event_t accel;
   sensors_event_t gyro;
   sensors_event_t mag;
@@ -194,8 +208,7 @@ void loop()
   accel_X = accel.acceleration.x;
   accel_Y = accel.acceleration.y;
   accel_Z = accel.acceleration.z;
-  // gps = {0.5, 0.1};
-  /* Display the results (acceleration is measured in m/s^2) */
+  // Display the results (acceleration is measured in m/s^2)
   Serial.print("\t\tAccel X: ");
   Serial.print(accel.acceleration.x);
   Serial.print(" \tY: ");
@@ -216,23 +229,17 @@ void loop()
   int batterypercent = (voltage / 3.7) * 100;
   Serial.print(batterypercent);
   Serial.println("%");
-  battery = batterypercent;
+  battery = batterypercent; */
 
-  //gps = {53.525, -113.5275};
-
-/*
   // check if there is new GPS data available
-  if (GPS.available()) {
+  if (GPS.available())
+  {
     // read GPS values
-    Serial.print("GPS is available");
-    float latitude   = GPS.latitude();
-    float longitude  = GPS.longitude();
-    float altitude   = GPS.altitude();
-    float speed      = GPS.speed();
-    int   satellites = GPS.satellites();
-
-    //gps = {latitude, longitude};
-
+    float latitude = GPS.latitude();
+    float longitude = GPS.longitude();
+    float altitude = GPS.altitude();
+    float speed = GPS.speed();
+    int satellites = GPS.satellites();
 
     // print GPS values
     Serial.print("Location: ");
@@ -250,5 +257,9 @@ void loop()
 
     Serial.print("Number of satellites: ");
     Serial.println(satellites);
-}*/
+
+    Serial.println();
+
+    gps = {latitude, longitude};
+  }
 }

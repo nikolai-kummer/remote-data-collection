@@ -1,2 +1,2 @@
-#define SECRET_SSID "PixelCow"
-#define SECRET_OPTIONAL_PASS "NIKOLAI01"
+#define SECRET_SSID "SHAW-4617"
+#define SECRET_OPTIONAL_PASS "degree1355dough"

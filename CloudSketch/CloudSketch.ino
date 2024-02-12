@@ -218,18 +218,20 @@ void loop()
   Serial.println("%");
   battery = batterypercent;
 
-  gps = {53.525, -113.5275};
+  //gps = {53.525, -113.5275};
 
-  /*// check if there is new GPS data available
+/*
+  // check if there is new GPS data available
   if (GPS.available()) {
     // read GPS values
+    Serial.print("GPS is available");
     float latitude   = GPS.latitude();
     float longitude  = GPS.longitude();
     float altitude   = GPS.altitude();
     float speed      = GPS.speed();
     int   satellites = GPS.satellites();
 
-    gps = {latitude, longitude};
+    //gps = {latitude, longitude};
 
 
     // print GPS values

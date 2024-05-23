@@ -1,0 +1,16 @@
+env:
+  max_power: 100
+  min_power: 0
+  time_intervals: 72
+  action_list: ['sleep', 'collect', 'send all']
+  max_messages: 24
+  power_levels: 20
+
+agent:
+  alpha: 0.1
+  gamma: 0.9
+  epsilon: 0.1
+  epsilon_decay: 0.99
+
+train:
+  num_episodes: 500

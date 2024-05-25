@@ -1,20 +1,3 @@
-/*
-  Azure IoT Hub WiFi
-
-  This sketch securely connects to an Azure IoT Hub using MQTT over WiFi.
-  It uses a private key stored in the ATECC508A and a self signed public
-  certificate for SSL/TLS authetication.
-
-  It publishes a message every 5 seconds to "devices/{deviceId}/messages/events/" topic
-  and subscribes to messages on the "devices/{deviceId}/messages/devicebound/#"
-  topic.
-
-  The circuit:
-  - Arduino MKR WiFi 1010 or MKR1000
-
-  This example code is in the public domain.
-*/
-
 #include <ArduinoBearSSL.h>
 #include <ArduinoECCX08.h>
 #include <utility/ECCX08SelfSignedCert.h>
@@ -28,7 +11,7 @@ const char ssid[]        = SECRET_SSID;
 const char pass[]        = SECRET_PASS;
 const char broker[]      = SECRET_BROKER;
 String     deviceId      = SECRET_DEVICE_ID;
-String     deviceKey     = SECRET_DEVICE_PRIMARY_KEY;
+String     deviceKey     = SECRET_DEVICE_SAS;
 
 WiFiClient    wifiClient;            // Used for the TCP socket connection
 BearSSLClient sslClient(wifiClient); // Used for SSL/TLS connection, integrates with ECC508
@@ -47,17 +30,17 @@ void setup() {
   }
 
   // reconstruct the self signed cert
-  // ECCX08SelfSignedCert.beginReconstruction(0, 8);
-  // ECCX08SelfSignedCert.setCommonName(ECCX08.serialNumber());
-  // ECCX08SelfSignedCert.endReconstruction();
+  ECCX08SelfSignedCert.beginReconstruction(0, 8);
+  ECCX08SelfSignedCert.setCommonName(ECCX08.serialNumber());
+  ECCX08SelfSignedCert.endReconstruction();
 
   // Set a callback to get the current time
   // used to validate the servers certificate
-  // ArduinoBearSSL.onGetTime(getTime);
+  ArduinoBearSSL.onGetTime(getTime);
 
   // Set the ECCX08 slot to use for the private key
   // and the accompanying public certificate for it
-  // sslClient.setEccSlot(0, ECCX08SelfSignedCert.bytes(), ECCX08SelfSignedCert.length());
+  sslClient.setEccSlot(0, ECCX08SelfSignedCert.bytes(), ECCX08SelfSignedCert.length());
 
   // Set the client id used for MQTT as the device id
   mqttClient.setId(deviceId);
@@ -68,7 +51,7 @@ void setup() {
   username += broker;
   username += "/";
   username += deviceId;
-  username += "/api-version=2018-06-30";
+  // username += "?api-version=2022-07-31";
 
   mqttClient.setUsernamePassword(username, deviceKey);
 

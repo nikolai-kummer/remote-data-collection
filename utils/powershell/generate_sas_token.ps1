@@ -1,0 +1,1 @@
+az iot hub generate-sas-token -n eco-tracker-hub --device-id eco-tracker-01 --duration 2592000

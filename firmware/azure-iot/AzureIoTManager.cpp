@@ -62,11 +62,19 @@ void AzureIoTManager::poll() {
 }
 
 void AzureIoTManager::publishMessage() {
+    Serial.println("Publishing empty test message");
+    mqttClient.beginMessage("devices/" + String(SECRET_DEVICE_ID) + "/messages/events/");
+    mqttClient.print("{'time': '");
+    mqttClient.print(millis());
+    mqttClient.print("'}");
+    mqttClient.endMessage();
+}
+
+void AzureIoTManager::publishMessage(const String& message) {
     Serial.println("Publishing message");
     // send message, the Print interface can be used to set the message contents
     mqttClient.beginMessage("devices/" + String(SECRET_DEVICE_ID) + "/messages/events/");
-    mqttClient.print("hello ");
-    mqttClient.print(millis());
+    mqttClient.print(message);
     mqttClient.endMessage();
 }
 

@@ -1,12 +1,25 @@
 #include <Arduino.h>
-#include "WiFiManager.h"
 #include "AzureIoTManager.h"
+#include "MessagePayload.h"
+#include "WiFiManager.h"
 
 WiFiClient wifiClient;
 WiFiManager wifiManager;
 AzureIoTManager azureIoTManager(wifiClient);
 
 unsigned long lastMillis = 0;
+
+
+String createMessagePayload() {
+    MessagePayload payload;
+    payload.accelerometer_x = random(100) / 10.0;
+    payload.accelerometer_y = random(100) / 10.0;
+    payload.accelerometer_z = random(100) / 10.0;
+    payload.gps_coordinates = "52.5200,13.4050"; // Example coordinates
+    payload.battery_level = random(100) / 10.0;
+
+    return payload.toString();
+}
 
 void setup() {
     Serial.begin(9600);
@@ -29,8 +42,11 @@ void loop() {
 
     azureIoTManager.poll();
 
-    if (millis() - lastMillis > 5000) {
+    if (millis() - lastMillis > 60000) {
         lastMillis = millis();
-        azureIoTManager.publishMessage();
+
+        String message = createMessagePayload();
+        Serial.println("Publishing message: " + message);
+        azureIoTManager.publishMessage(message);
     }
 }

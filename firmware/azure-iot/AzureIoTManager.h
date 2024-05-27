@@ -15,6 +15,7 @@ public:
     void connect();
     void poll();
     void publishMessage();
+    void publishMessage(const String& message);
     bool isConnected();
 
 private:

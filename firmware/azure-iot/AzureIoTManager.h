@@ -7,6 +7,8 @@
 #include <ArduinoMqttClient.h>
 #include <WiFiNINA.h>
 #include "arduino_secrets.h"
+#include "base64.h"
+#include "sha256.h"
 
 class AzureIoTManager {
 public:
@@ -17,6 +19,9 @@ public:
     void publishMessage();
     void publishMessage(const String& message);
     bool isConnected();
+    String generateSASToken(char *key, String url, long expire);
+    //String generateSASToken(const String &uri, const String &key, int expiryInSeconds);
+    //String generateSasToken(String resourceUri, String key, String policyName, int expiryInSeconds);
 
 private:
     BearSSLClient sslClient;

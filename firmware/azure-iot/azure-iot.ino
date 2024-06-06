@@ -1,29 +1,23 @@
 #include <Arduino.h>
 #include "MessagePayload.h"
+#include "WiFiManager.h"
 #include <PubSubClient.h>
-#include <WiFiNINA.h>
-#include <WiFiUdp.h>
-#include <RTCZero.h>
 
 
 #include "arduino_secrets.h"
-#include "./ntp.h"
 #include "./sha256.h"
 #include "./base64.h"
 #include "./utils.h"
 
 
-WiFiSSLClient wifiClient;
-WiFiUDP wifiUdp;
-NTP ntp(wifiUdp);
+
+WiFiManager wifiManager(SECRET_SSID, SECRET_PASS);
 
 RTCZero rtc; // real time clock
 #include "./iotc_dps.h"
 
 PubSubClient *mqtt_client = NULL;
 
-const char wifi_ssid[] = SECRET_SSID;
-const char wifi_password[] = SECRET_PASS;
 
 // Working variables
 bool timeSet = false;
@@ -43,20 +37,7 @@ String createMessagePayload() {
     return payload.toString();
 }
 
-// get the time from NTP and set the real-time clock on the MKR10x0
-void getTime() {
-    Serial.println(F("Getting the time from time service: "));
 
-    ntp.begin();
-    ntp.update();
-    Serial.print(F("Current time: "));
-    Serial.print(ntp.formattedTime("%d. %B %Y - "));
-    Serial.println(ntp.formattedTime("%A %T"));
-
-    rtc.begin();
-    rtc.setEpoch(ntp.epoch());
-    timeSet = true;
-}
 
 // create an IoT Hub SAS token for authentication
 String createIotHubSASToken(char *key, String url, long expire){
@@ -118,20 +99,12 @@ void setup() {
     Serial.begin(115200);
     while (!Serial);
     Serial.println("Start!");
+    
+    // // attempt to connect to Wifi network:
+    wifiManager.connectToWiFi();
+    wifiManager.initializeTime();
 
-    // attempt to connect to Wifi network:
-    Serial.print((char*)F("WiFi Firmware version is "));
-    Serial.println(WiFi.firmwareVersion());
-    int status = WL_IDLE_STATUS;
-    while ( status != WL_CONNECTED) {
-        Serial.println("Attempting to connect to Wi-Fi SSID");
-        // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
-        status = WiFi.begin(wifi_ssid, wifi_password);
-        delay(1000);
-    }
-
-    getTime();
-    Serial.println("Getting IoT Hub host from Azure IoT DPS");
+    Serial.println("Getting IoT Hub SAS token ...");
     String deviceId = SECRET_DEVICE_ID;
     String sharedAccessKey = SECRET_DEVICE_KEY;
     String iothubHost = SECRET_BROKER;
@@ -141,15 +114,12 @@ void setup() {
     char *devKey = (char *)sharedAccessKey.c_str();
     long expire = rtc.getEpoch() + 864000;
     String sasToken = createIotHubSASToken(devKey, url, expire);
-    // String username = iothubHost + "/" + deviceId + (char*)F("/api-version=2016-11-14");
     String username = iothubHost + "/" + deviceId + (char*)F("/api-version=2018-06-30");
     
     // connect to the IoT Hub MQTT broker
-    wifiClient.connect(iothubHost.c_str(), 8883);
-    mqtt_client = new PubSubClient(iothubHost.c_str(), 8883, wifiClient);
+    wifiManager.connectToBroker(SECRET_BROKER, 8883);
+    mqtt_client = new PubSubClient(iothubHost.c_str(), 8883, wifiManager.getWiFiClient());
     connectMQTT(deviceId, username, sasToken);
-
-
 }
 
 void loop() {

@@ -1,21 +1,21 @@
 #include "MessagePayload.h"
 
 MessagePayload::MessagePayload() {
-    accelerometer_x = 0.0;
-    accelerometer_y = 0.0;
-    accelerometer_z = 0.0;
-    gps_coordinates = "";
-    battery_level = 0.0;
+    acc_x = 0.0;
+    acc_y = 0.0;
+    acc_z = 0.0;
+    gps_lat = 0.0;
+    bat = 0.0;
 }
 
 String MessagePayload::toString() {
     //TODO: Do we want to send the default values if the values are not set?
     String payload = "{";
-    payload += "\"accelerometer_x\": " + String(accelerometer_x, 2) + ",";
-    payload += "\"accelerometer_y\": " + String(accelerometer_y, 2) + ",";
-    payload += "\"accelerometer_z\": " + String(accelerometer_z, 2) + ",";
-    payload += "\"gps_coordinates\": \"" + gps_coordinates + "\",";
-    payload += "\"battery_level\": " + String(battery_level, 2);
+    payload += "\"acc_x\": " + String(acc_x, 2) + ",";
+    payload += "\"acc_y\": " + String(acc_y, 2) + ",";
+    payload += "\"acc_z\": " + String(acc_z, 2) + ",";
+    payload += "\"gps_lat\": \"" + String(gps_lat,2) + "\",";
+    payload += "\"bat\": " + String(bat, 2);
     payload += "}";
     return payload;
 }

@@ -15,6 +15,8 @@ public:
     unsigned long getCurrentTime();
     WiFiSSLClient& getWiFiClient();  // Provide access to the WiFi client
     void connectToBroker(const char* broker, uint16_t port);  // Connect to MQTT broker
+    RTCZero& getRTC();  // Provide access to the RTC
+    uint32_t getEpoch();  // Get the current epoch time
     
 private:
     const char* _ssid;
@@ -26,4 +28,4 @@ private:
     WiFiSSLClient _wifiClient;
 };
 
-#endif // WIFIMANIDER_H
+#endif // WIFIMANAGER_H

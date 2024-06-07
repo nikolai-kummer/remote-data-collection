@@ -1,120 +1,74 @@
-// #include "AzureIoTManager.h"
-// #include <Arduino.h>
-// #include <PubSubClient.h>
+#include "AzureIoTManager.h"
 
-// WiFiSSLClient wifiClient;
-// PubSubClient mqttClient(wifiClient);
+AzureIoTManager::AzureIoTManager(const char* device_id, const char* device_key, const char* host, WiFiManager& wifi_manager) :
+    device_id(device_id), device_key(device_key), host(host), wifi_manager(wifi_manager) {
+    mqtt_client = new PubSubClient(host, 8883, wifi_manager.getWiFiClient());
+}
 
+String AzureIoTManager::createIotHubSASToken(String url, long expire) {
+    char *devKey = (char *)device_key.c_str();
+    url.toLowerCase();
+    String stringToSign = url + "\n" + String(expire);
+    int keyLength = strlen(device_key.c_str());
 
-// AzureIoTManager::AzureIoTManager(WiFiClient& wifiClient) : sslClient(wifiClient), mqttClient(sslClient) {}
+    int decodedKeyLength = base64_dec_len(devKey, keyLength);
+    char decodedKey[decodedKeyLength];
 
-// void AzureIoTManager::begin() {
-//     // if (!ECCX08.begin()) {
-//     //     Serial.println("No ECCX08 present!");
-//     //     while (1);
-//     // }
+    base64_decode(decodedKey, devKey, keyLength);
 
-//     // // reconstruct the self signed cert
-//     // ECCX08SelfSignedCert.beginReconstruction(0, 8);
-//     // ECCX08SelfSignedCert.setCommonName(ECCX08.serialNumber());
-//     // ECCX08SelfSignedCert.endReconstruction();
+    Sha256 *sha256 = new Sha256();
+    sha256->initHmac((const uint8_t*)decodedKey, (size_t)decodedKeyLength);
+    sha256->print(stringToSign);
+    char* sign = (char*) sha256->resultHmac();
+    int encodedSignLen = base64_enc_len(HASH_LENGTH);
+    char encodedSign[encodedSignLen];
+    base64_encode(encodedSign, sign, HASH_LENGTH);
+    delete(sha256);
 
-//     // // Set a callback to get the current time  used to validate the servers certificate
-//     // ArduinoBearSSL.onGetTime(getTime); // Pass the function pointer instead of a constant value
-    
-//     // Serial.println("Set the time callback");
-//     // Serial.println(getTime());
+    return (char*)F("SharedAccessSignature sr=") + url + (char*)F("&sig=") + urlEncode((const char*)encodedSign) + (char*)F("&se=") + String(expire);
+}
 
-//     // // Set the ECCX08 slot to use for the private key
-//     // // and the accompanying public certificate for it
-//     // sslClient.setEccSlot(0, ECCX08SelfSignedCert.bytes(), ECCX08SelfSignedCert.length());    
-//     // Serial.println("Set the ECCX08 slot");
+void AzureIoTManager::connectMQTT() {
+    mqtt_client->disconnect();
+    mqtt_client->setKeepAlive(60);
+    Serial.println(F("Starting IoT Hub connection"));
+    int retry = 0;
+    while(retry < 10 && !mqtt_client->connected()) {     
+        Serial.println(device_id.c_str());
+        Serial.println(mqtt_username.c_str());
+        Serial.println(sasToken.c_str());
 
+        if (mqtt_client->connect(device_id.c_str(), mqtt_username.c_str(), sasToken.c_str())) {
+                Serial.println(F("===> mqtt connected"));
+                mqttConnected = true;
+                mqtt_client->setKeepAlive(60);
+        } else {
+            Serial.print(F("---> mqtt failed, rc="));
+            Serial.println(mqtt_client->state());
+            delay(2000);
+            retry++;
+        }
+    }
+}
 
-//     // // Set the client id used for MQTT as the device id
-//     // mqttClient.setId(SECRET_DEVICE_ID);
+void AzureIoTManager::connect() {
+    if (!mqtt_client->connected()) {
+        Serial.println("Getting IoT Hub SAS token ...");
+        String url = host + urlEncode(String((char*)F("/devices/") + device_id).c_str());
+        long expire = wifi_manager.getEpoch() + 864000;
+        mqtt_username = host + "/" + device_id + (char*)F("/api-version=2018-06-30");
+        sasToken = createIotHubSASToken(url, expire);
+        connectMQTT();
+    }
+}
 
-//     // //IoT Azure MQTT communiation, set the username as broker/device and password is SAS token
-//     // String username;
-//     // username += SECRET_BROKER;
-//     // username += "/";
-//     // username += SECRET_DEVICE_ID;
-//     // username += "/?api-version=2018-06-30"; // TODO: doesn't work if this is included, but is good practivce to include it
-//     // Serial.println(username);
-//     // Serial.println(SECRET_DEVICE_SAS);
-//     // mqttClient.setUsernamePassword(username, SECRET_DEVICE_SAS);
+void AzureIoTManager::sendTelemetry(const String& payload) {
+    if (mqtt_client->connected()) {
+        String topic = "devices/" + String(device_id) + "/messages/events/";
+        mqtt_client->publish(topic.c_str(), payload.c_str());
+    }
+}
 
-//     // // TODO: figure out how to get the message given the mqtt client vs static function issue
-//     // mqttClient.onMessage(onMessageReceived);
-// }
-
-// void AzureIoTManager::connect() {
-//     Serial.print("Attempting to connect to MQTT broker: ");
-//     Serial.print(SECRET_BROKER);
-//     Serial.println(" ");
-
-//     while (!mqttClient.connect(SECRET_BROKER, 8883)) {
-//         // failed, retry
-//         Serial.print(".");
-//         Serial.println(mqttClient.connectError());
-//         delay(5000);
-//     }
-//     Serial.println();
-//     Serial.println("You're connected to the MQTT broker");
-//     Serial.println();
-
-//     // subscribe to a topic
-//     mqttClient.subscribe("devices/" + String(SECRET_DEVICE_ID) + "/messages/devicebound/#");
-// }
-
-// void AzureIoTManager::poll() {
-//     mqttClient.poll();
-// }
-
-// void AzureIoTManager::publishMessage() {
-//     Serial.println("Publishing empty test message");
-//     mqttClient.beginMessage("devices/" + String(SECRET_DEVICE_ID) + "/messages/events/");
-//     mqttClient.print("{'time': '");
-//     mqttClient.print(millis());
-//     mqttClient.print("'}");
-//     mqttClient.endMessage();
-// }
-
-// void AzureIoTManager::publishMessage(const String& message) {
-//     Serial.println("Publishing message");
-//     // send message, the Print interface can be used to set the message contents
-//     mqttClient.beginMessage("devices/" + String(SECRET_DEVICE_ID) + "/messages/events/");
-//     mqttClient.print(message);
-//     mqttClient.endMessage();
-// }
-
-// bool AzureIoTManager::isConnected() {
-//     return mqttClient.connected();
-// }
-
-// // unsigned long AzureIoTManager::getTime() {
-//     // get the current time from the WiFi module
-//     // return WiFi.getTime();
-// // }
-
-// unsigned long AzureIoTManager::getTime() {
-//     // Return a fixed Unix timestamp for testing
-//     return 1719027000; // Example: January 1, 2021, 00:00:00 GMT
-// }
-
-
-// void AzureIoTManager::onMessageReceived(int messageSize) {
-//     // we received a message, print out the topic and contents
-//     Serial.print("Received a message with topic '");
-//     // Serial.print(mqttClient.messageTopic());
-//     Serial.print("', length ");
-//     Serial.print(messageSize);
-//     Serial.println(" bytes:");
-
-//     // use the Stream interface to print the contents
-//     //while (mqttClient.available()) {
-//         //Serial.print((char)mqttClient.read());
-//     //}
-//     Serial.println();
-//     Serial.println();
-// }
+bool AzureIoTManager::isConnected() {
+    return mqtt_client->connected();
+}

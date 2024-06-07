@@ -5,11 +5,11 @@
 
 class MessagePayload {
 public:
-    float accelerometer_x;
-    float accelerometer_y;
-    float accelerometer_z;
-    String gps_coordinates;
-    float battery_level;
+    float acc_x;
+    float acc_y;
+    float acc_z;
+    float gps_lat;
+    float bat;
 
     MessagePayload();
     String toString();

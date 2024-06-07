@@ -46,4 +46,12 @@ void WiFiManager::connectToBroker(const char* broker, uint16_t port) {
     }
 }
 
+RTCZero& WiFiManager::getRTC() {
+    return _rtc;
+}
+
+uint32_t WiFiManager::getEpoch() {
+    return _rtc.getEpoch();
+}
+
 

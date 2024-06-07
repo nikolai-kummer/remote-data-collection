@@ -1,45 +1,9 @@
-// simple URL encoder
-String urlEncode(const char* msg)
-{
-    static const char *hex PROGMEM = "0123456789abcdef";
-    String encodedMsg = "";
+#ifndef UTILS_H
+#define UTILS_H
 
-    while (*msg!='\0'){
-        if( ('a' <= *msg && *msg <= 'z')
-            || ('A' <= *msg && *msg <= 'Z')
-            || ('0' <= *msg && *msg <= '9') ) {
-            encodedMsg += *msg;
-        } else {
-            encodedMsg += '%';
-            encodedMsg += hex[*msg >> 4];
-            encodedMsg += hex[*msg & 15];
-        }
-        msg++;
-    }
-    return encodedMsg;
-}
+#include <Arduino.h>
 
-int32_t indexOf(const char* buffer, size_t length, const char* look_for, size_t look_for_length, int32_t start_index) {
-    if (look_for_length > length) {
-        return -1;
-    }
+String urlEncode(const char* str);
+int32_t indexOf(const char* haystack, unsigned int haystack_len, const char* needle, unsigned search_len, long offset);
 
-    for (size_t pos = start_index; pos < length; pos++) {
-        if (length - pos < look_for_length) {
-            return -1;
-        }
-
-        if (buffer[pos] == *look_for) {
-            size_t sub = 1;
-            for (; sub < look_for_length; sub++) {
-                if (buffer[pos + sub] != look_for[sub]) break;
-            }
-
-            if (sub == look_for_length) {
-                return pos;
-            }
-        }
-    }
-
-    return -1;
-}
+#endif // UTILS_H

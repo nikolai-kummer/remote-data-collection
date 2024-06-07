@@ -1,29 +1,32 @@
-// #ifndef AZUREIOTMANAGER_H
-// #define AZUREIOTMANAGER_H
+#ifndef AzureIoTManager_h
+#define AzureIoTManager_h
 
-// #include <ArduinoBearSSL.h>
-// #include <ArduinoECCX08.h>
-// #include <utility/ECCX08SelfSignedCert.h>
-// #include <ArduinoMqttClient.h>
-// #include <WiFiNINA.h>
-// #include "arduino_secrets.h"
+#include <Arduino.h>
+#include <PubSubClient.h>
+#include "WiFiManager.h"
+#include "./sha256.h"
+#include "./base64.h"
+#include "./utils.h"
 
-// class AzureIoTManager {
-// public:
-//     AzureIoTManager(WiFiClient& wifiClient);
-//     void begin();
-//     void connect();
-//     void poll();
-//     void publishMessage();
-//     void publishMessage(const String& message);
-//     bool isConnected();
+class AzureIoTManager {
+public:
+    AzureIoTManager(const char* device_id, const char* device_key, const char* host, WiFiManager& wifi_manager);
+    void connect();
+    void sendTelemetry(const String& payload);
+    bool isConnected();
 
-// private:
-//     BearSSLClient sslClient;
-//     MqttClient mqttClient;
+private:
+    String createIotHubSASToken(String url, long expire);
+    void connectMQTT();
 
-//     static unsigned long getTime();
-//     static void onMessageReceived(int messageSize);
-// };
+    String device_id;
+    String device_key;
+    String host;
+    String sasToken;
+    String mqtt_username;
+    PubSubClient* mqtt_client;
+    WiFiManager& wifi_manager;
+    bool mqttConnected = false;
+};
 
-// #endif // AZUREIOTMANAGER_H
+#endif

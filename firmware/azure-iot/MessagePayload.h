@@ -10,6 +10,7 @@ public:
     float acc_z;
     float gps_lat;
     float bat;
+    float volt;
 
     MessagePayload();
     String toString();

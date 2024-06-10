@@ -16,6 +16,12 @@ void WiFiManager::connectToWiFi() {
     Serial.println(" Connected to WiFi");
 }
 
+void WiFiManager::disconnectWiFi() {
+    WiFi.disconnect();
+    Serial.println("Disconnected from WiFi");
+    WiFi.end();
+}
+
 void WiFiManager::initializeTime() {
     Serial.println("Initializing NTP...");
     _ntp.begin();

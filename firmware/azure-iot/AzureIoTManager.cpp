@@ -65,6 +65,7 @@ void AzureIoTManager::connect() {
 void AzureIoTManager::sendTelemetry(const String& payload) {
     if (mqtt_client->connected()) {
         String topic = "devices/" + String(device_id) + "/messages/events/";
+        Serial.println(payload);
         mqtt_client->publish(topic.c_str(), payload.c_str());
     }
 }

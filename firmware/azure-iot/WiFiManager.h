@@ -11,6 +11,7 @@ class WiFiManager {
 public:
     WiFiManager(const char* ssid, const char* password);
     void connectToWiFi();
+    void disconnectWiFi();
     void initializeTime();
     unsigned long getCurrentTime();
     WiFiSSLClient& getWiFiClient();  // Provide access to the WiFi client

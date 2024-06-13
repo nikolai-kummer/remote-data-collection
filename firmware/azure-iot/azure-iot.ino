@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "ArduinoLowPower.h"
-#include "BatteryManager.h" 
+#include "BatteryManager.h"
+#include "LEDManager.h" 
 #include "MessagePayload.h"
 #include "WiFiManager.h"
 #include "AzureIoTManager.h"
@@ -11,6 +12,7 @@ RTCZero rtc; // real time clock
 WiFiManager wifiManager(SECRET_SSID, SECRET_PASS);
 AzureIoTManager azureIoTManager(SECRET_DEVICE_ID, SECRET_DEVICE_KEY, SECRET_BROKER, wifiManager);
 BatteryManager batteryManager; // Create an instance of BatteryManager
+LEDManager builtinLed(LED_BUILTIN); // Create an instance of LEDManager
 
 #include "./iotc_dps.h" // this one is not really used, because the device is already provisioned via python script
 
@@ -41,6 +43,7 @@ String createMessagePayload() {
 }
 
 void sendTelemetry() {
+    builtinLed.on();
     batteryManager.begin();
     wifiManager.connectToWiFi();
     wifiManager.initializeTime();
@@ -57,9 +60,8 @@ void sendTelemetry() {
         // You can do other non-blocking tasks here if needed
     }
     wifiManager.disconnectWiFi();
+    builtinLed.off();
 }
-
-
 
 
 void setup() {

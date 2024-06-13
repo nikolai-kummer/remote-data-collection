@@ -8,7 +8,7 @@ bool BatteryManager::begin() {
     Wire.begin(); // Start I2C
     if (!lipo.begin()) {
         Serial.println(F("MAX17043 not detected. Please check wiring. Freezing."));
-        while (1); // Halt execution if the sensor is not detected
+        return false;
     }
     lipo.quickStart(); // Reset the MAX17043's algorithm
     lipo.wake(); // Wake the MAX17043 from sleep

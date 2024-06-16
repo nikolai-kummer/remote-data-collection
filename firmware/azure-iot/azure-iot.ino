@@ -44,7 +44,7 @@ String createMessagePayload() {
 
 void sendTelemetry() {
     builtinLed.on();
-    batteryManager.begin();
+    bool sensorReady = batteryManager.begin();
     wifiManager.connectToWiFi();
     wifiManager.initializeTime();
     azureIoTManager.connect();
@@ -52,7 +52,11 @@ void sendTelemetry() {
     startTime = millis();  // Record the start time
     if (azureIoTManager.isConnected()) {
         Serial.println(F("Sending telemetry ..."));
-        azureIoTManager.sendTelemetry(createMessagePayload());
+        if (sensorReady) {
+            azureIoTManager.sendTelemetry(createMessagePayload());
+        } else {
+            Serial.println(F("Sensor not ready!"));
+        }
     }
     // Make sure enough time passes for sending before disconnecting
     while (millis() - startTime < MINIMUM_TELEMETRY_SEND_DURATION) {

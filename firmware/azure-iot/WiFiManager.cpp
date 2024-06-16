@@ -7,10 +7,12 @@ void WiFiManager::connectToWiFi() {
     Serial.println(_ssid);
 
     int status = WiFi.begin(_ssid, _password);
-    while (status != WL_CONNECTED) {
+    int connectionAttempts = 0;
+    while (status != WL_CONNECTED && connectionAttempts < 8) {
         delay(1000);
         Serial.print(".");
         status = WiFi.status();
+        connectionAttempts++;
     }
 
     Serial.println(" Connected to WiFi");

@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "Arduino_PMIC.h"
 #include "ArduinoLowPower.h"
 #include "BatteryManager.h"
 #include "LEDManager.h" 
@@ -38,8 +39,23 @@ String createMessagePayload() {
     payload.gps_lat =  0.0 / 10.0; // Example coordinates
     payload.bat = batteryManager.readCharge();
     payload.volt = batteryManager.readVoltage();
-
     return payload.toString();
+}
+
+void setupPMIC() {
+    // Start the Power Management IC and disable a bunch of power hoggers
+    if (!PMIC.begin()) {
+        Serial.println("Failed to initialize PMIC");
+        return;
+    }
+    if (!PMIC.disableWatchdog()) { // Disable the watchdog timer starts blinking the LED after a while
+        Serial.println("Failed to disable watchdog");
+    }
+    if (!PMIC.disableBATFET()) { // Disable the battery charging
+        Serial.println("Failed to disable charging");
+    }
+
+    PMIC.end();
 }
 
 void sendTelemetry() {
@@ -72,13 +88,15 @@ void setup() {
     Serial.begin(115200);
     Serial.println("Start!");
 
-    // Loop to allow dor upload on reset
+    // Loop to allow for upload on reset
     startTime = millis();  // Record the start time
     while (millis() - startTime < 20000) {
         // Just loop here for 20,000 milliseconds (20 seconds)
         // You can do other non-blocking tasks here if needed
     }
     Serial.println("20 seconds elapsed.");
+
+    setupPMIC();
 }
 
 void loop() {

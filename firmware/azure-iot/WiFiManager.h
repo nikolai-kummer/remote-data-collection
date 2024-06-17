@@ -10,7 +10,7 @@
 class WiFiManager {
 public:
     WiFiManager(const char* ssid, const char* password);
-    void connectToWiFi();
+    bool connectToWiFi();
     void disconnectWiFi();
     void initializeTime();
     unsigned long getCurrentTime();

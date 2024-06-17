@@ -58,10 +58,22 @@ void setupPMIC() {
     PMIC.end();
 }
 
+void switchTolowPower(){
+    // Function to switch the various components to low power mode
+    wifiManager.disconnectWiFi();
+    batteryManager.end();
+    builtinLed.off();
+}
+
 void sendTelemetry() {
     builtinLed.on();
     bool sensorReady = batteryManager.begin();
-    wifiManager.connectToWiFi();
+    bool wifiConnected = wifiManager.connectToWiFi();
+    if (!wifiConnected) {
+        Serial.println(F("Failed to connect to WiFi!"));
+        switchTolowPower();
+        return;
+    }
     wifiManager.initializeTime();
     azureIoTManager.connect();
 
@@ -79,8 +91,7 @@ void sendTelemetry() {
         // Just loop here for 10,000 milliseconds (10 seconds)
         // You can do other non-blocking tasks here if needed
     }
-    wifiManager.disconnectWiFi();
-    builtinLed.off();
+    switchTolowPower();
 }
 
 

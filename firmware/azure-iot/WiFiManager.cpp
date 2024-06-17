@@ -2,7 +2,7 @@
 
 WiFiManager::WiFiManager(const char* ssid, const char* password) : _ssid(ssid), _password(password), _ntp(_wifiUdp) {}
 
-void WiFiManager::connectToWiFi() {
+bool WiFiManager::connectToWiFi() {
     Serial.print("Connecting to WiFi SSID: ");
     Serial.println(_ssid);
 
@@ -14,8 +14,13 @@ void WiFiManager::connectToWiFi() {
         status = WiFi.status();
         connectionAttempts++;
     }
+    if (status != WL_CONNECTED) {
+        Serial.println(" Failed to connect to WiFi");
+        return false;
+    }
 
     Serial.println(" Connected to WiFi");
+    return true;
 }
 
 void WiFiManager::disconnectWiFi() {

@@ -7,7 +7,7 @@ BatteryManager::BatteryManager() {
 bool BatteryManager::begin() {
     Wire.begin(); // Start I2C
     if (!lipo.begin()) {
-        Serial.println(F("MAX17043 not detected. Please check wiring. Freezing."));
+        Serial.println(F("MAX17043 not detected. Please check wiring."));
         return false;
     }
     lipo.quickStart(); // Reset the MAX17043's algorithm

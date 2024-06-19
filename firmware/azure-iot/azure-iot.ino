@@ -83,6 +83,7 @@ void sendTelemetry() {
         if (sensorReady) {
             azureIoTManager.sendTelemetry(createMessagePayload());
         } else {
+            azureIoTManager.sendTelemetry("{\"error\": \"Connected, but sensor not ready\"}");
             Serial.println(F("Sensor not ready!"));
         }
     }

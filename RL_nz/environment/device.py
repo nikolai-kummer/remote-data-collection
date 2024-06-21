@@ -1,0 +1,64 @@
+
+class Device:
+    _power_current: float
+    _power_max: float
+    _power_idle: float
+    _power_transmit: float
+    _power_collect: float
+    _rounding_factor: int
+    
+    def __init__(self,
+                 power_level: float = 1050.0,
+                 power_max: float = 2100.0,
+                 power_idle: float = 7.5,
+                 power_transmit: float = 2.5,
+                 power_collect: float = 1.0,
+                 rounding_factor: int = 5
+                 ) -> None:
+        
+        self._power_current = min(power_level, power_max)
+        self._power_max = power_max
+        self._power_idle = power_idle
+        self._power_transmit = power_transmit
+        self._power_collect = power_collect
+        self._rounding_factor = rounding_factor
+        pass
+
+    
+    def get_power_level_float(self) -> float:
+        """ Returns the current power level. """
+        return self._power_current
+    
+    def calculate_power_percentage(self) -> int:
+        """ Returns the power level as percentage of the maximum power level. Rounded down to the nearest integer."""
+        return int(self._power_current / self._power_max*100.0)
+    
+    def calculate_rounded_power_level(self) -> int:
+        """ Returns the power level as percentage of the maximum power level. Rounded to the nearest integer."""
+        return int((self._power_current / self._power_max)/self._rounding_factor*100.0)
+        
+    def take_action(self, action: int) -> None:
+        """ Takes an action and updates the power level accordingly. """
+        if action == 0:
+            self._power_current -= self._power_idle
+        elif action == 1:
+            self._power_current -= (self._power_idle + self._power_collect)
+        elif action == 2:
+            self._power_current -= (self._power_idle + self._power_transmit)
+        else:
+            raise ValueError("Invalid action")
+        self._power_current = max(0, self._power_current)
+        
+    
+    def set_power_percentage(self, power_level_percent: float) -> None:
+        """ Sets the power level precentage """
+        self._power_current = (power_level_percent/100.0) * self._power_max
+
+    
+    def add_power(self, power: float) -> None:
+        """ Adds power to the current power level """
+        self._power_current += power
+        self._power_current = min(self._power_current, self._power_max)
+        
+    
+    

@@ -1,24 +1,24 @@
 from utils.plot import plot_results
 from environment.custom_env import CustomEnv
 
-def get_reward(action, current_power, message_count, prev_message_count):
+def get_reward(action, current_power, message_count):
     reward = 0
 
     if current_power <= 0:
-        reward -= 50
+        reward -= 10
     else:
-        reward += current_power * 0.005
+        reward += current_power * 0.05
 
     if action == 0:
-        reward -= 2
+        reward -= 4
     elif action == 1:
-        reward += 0.5
+        reward += 0.05
     elif action == 2:
-        if prev_message_count > 0:
-            reward += prev_message_count
+        if current_power > 0:
+            if message_count > 0:
+                reward += message_count*2
         else:
-            reward -= 5
-
+            reward -= 5 # do we ever get here?
     return reward
 
 def save_results(filename, data):
@@ -28,34 +28,36 @@ def save_results(filename, data):
         writer.writerow(["Episode", "Value"])
         writer.writerows(enumerate(data, 1))
 
-def train(env, agent, train_config):
+def train(env: CustomEnv, agent, train_config):
     num_episodes = train_config['num_episodes']
     reward_list = []
     legitimate_messages_list = []
 
     for episode in range(num_episodes):
-        current_power = 50
-        current_state = env.encode_state(current_power, 0, 0)
+        env.init_state(power_level=50, time=16, message_count=0)
         total_reward = 0
         power_list = []
         legitimate_messages_sent_this_episode = 0
 
-        for t in range(env.N_TIME_INTERVALS * 3):
-            action = agent.select_action(current_state)
-            next_state, current_power, legitimate_messages = env.transition(current_state, action, current_power)
-            reward = get_reward(action, current_power, legitimate_messages, current_state)
-            power_list.append(current_power)
-            legitimate_messages_sent_this_episode += legitimate_messages
-            agent.update_q_value(current_state, action, reward, next_state)
-            current_state = next_state
-            total_reward += reward
+        for day in range(env.N_DAYS):
+            for t in range(env.N_TIME_INTERVALS):
+                current_state = env.encode_state()
+                action = agent.select_action(current_state)
+                legitimate_messages = env.transition(action)
+                
+                current_power = env.get_power()
+                reward = get_reward(action, current_power, legitimate_messages)
+                power_list.append(current_power)
+                legitimate_messages_sent_this_episode += legitimate_messages
+                agent.update_q_value(current_state, action, reward, env.encode_state())
+                total_reward += reward
 
         agent.decay_epsilon()
         reward_list.append(total_reward)
         legitimate_messages_list.append(legitimate_messages_sent_this_episode)
         print(f'Episode {episode+1}: Total Reward = {total_reward}, Legitimate Messages Sent = {legitimate_messages_sent_this_episode}')
 
-        if episode % 100 == 0:
+        if episode % 1000 == 0:
             plot_results(power_list, episode)
 
     plot_results(reward_list, "Rewards")

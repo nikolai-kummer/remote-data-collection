@@ -7,7 +7,7 @@ class DQNAgent:
         self.gamma = config['gamma']
         self.epsilon = config['epsilon']
         self.epsilon_decay = config['epsilon_decay']
-        self.N_STATES = env.N_POWER_LEVELS * env.N_TIME_INTERVALS * env.MAX_MESSAGES
+        self.N_STATES = (env.N_POWER_LEVELS+1) * (env.N_TIME_INTERVALS+1) * env.MAX_MESSAGES
         self.N_ACTIONS = env.N_ACTIONS
         self.Q_matrix = np.zeros((self.N_STATES, self.N_ACTIONS))
 

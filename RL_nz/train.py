@@ -7,18 +7,15 @@ def get_reward(action, current_power, message_count):
     if current_power <= 0:
         reward -= 10
     else:
-        reward += current_power * 0.05
+        reward += current_power * 0.001
 
     if action == 0:
-        reward -= 4
+        reward -= 0
     elif action == 1:
-        reward += 0.05
+        reward += 0.1
     elif action == 2:
-        if current_power > 0:
-            if message_count > 0:
-                reward += message_count*2
-        else:
-            reward -= 5 # do we ever get here?
+        if message_count > 0:
+            reward += message_count
     return reward
 
 def save_results(filename, data):
@@ -57,8 +54,8 @@ def train(env: CustomEnv, agent, train_config):
         legitimate_messages_list.append(legitimate_messages_sent_this_episode)
         print(f'Episode {episode+1}: Total Reward = {total_reward}, Legitimate Messages Sent = {legitimate_messages_sent_this_episode}')
 
-        if episode % 1000 == 0:
-            plot_results(power_list, episode)
+        # if episode % 10000 == 0:
+        #     plot_results(power_list, episode)
 
     plot_results(reward_list, "Rewards")
     plot_results(legitimate_messages_list, "Legitimate Messages")

@@ -10,8 +10,8 @@ class Device:
     def __init__(self,
                  power_level: float = 1050.0,
                  power_max: float = 2100.0,
-                 power_idle: float = 7.5,
-                 power_transmit: float = 2.5,
+                 power_idle: float = 1.0,
+                 power_transmit: float = 10.0,
                  power_collect: float = 1.0,
                  rounding_factor: int = 5
                  ) -> None:
@@ -22,6 +22,7 @@ class Device:
         self._power_transmit = power_transmit
         self._power_collect = power_collect
         self._rounding_factor = rounding_factor
+        self._message_queue_length = 0
         pass
 
     
@@ -39,20 +40,32 @@ class Device:
         
     def take_action(self, action: int) -> None:
         """ Takes an action and updates the power level accordingly. """
+        messages_send = 0
         if action == 0:
             self._power_current -= self._power_idle
         elif action == 1:
+            power_consumed = self._power_idle + self._power_collect
+            if self._power_current >= power_consumed:
+                self._message_queue_length += 1
             self._power_current -= (self._power_idle + self._power_collect)
         elif action == 2:
+            power_consumed = self._power_idle + self._power_transmit
+            if self._power_current >= power_consumed:
+                messages_send = self._message_queue_length+1
+                self._message_queue_length = 0
             self._power_current -= (self._power_idle + self._power_transmit)
         else:
             raise ValueError("Invalid action")
         self._power_current = max(0, self._power_current)
-        
+        return messages_send
     
     def set_power_percentage(self, power_level_percent: float) -> None:
         """ Sets the power level precentage """
         self._power_current = (power_level_percent/100.0) * self._power_max
+        
+    def set_message_queue_length(self, message_count: int) -> None:
+        """ Sets the message queue length """
+        self._message_queue_length = message_count
 
     
     def add_power(self, power: float) -> None:

@@ -1,7 +1,7 @@
 env:
-  max_power: 100
+  max_power: 2100
   min_power: 0
-  n_days: 3
+  n_days: 90
   time_intervals: 48
   action_list: ['sleep', 'collect', 'send all']
   max_messages: 24
@@ -10,8 +10,8 @@ env:
 agent:
   alpha: 0.1
   gamma: 0.9
-  epsilon: 0.1
-  epsilon_decay: 0.99
+  epsilon: 0.5
+  epsilon_decay: 0.9999
 
 train:
-  num_episodes: 5000
+  num_episodes: 100000

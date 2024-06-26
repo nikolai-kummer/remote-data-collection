@@ -9,7 +9,8 @@ class DQNAgent:
         self.epsilon_decay = config['epsilon_decay']
         self.N_STATES = (env.N_POWER_LEVELS+1) * (env.N_TIME_INTERVALS+1) * env.MAX_MESSAGES
         self.N_ACTIONS = env.N_ACTIONS
-        self.Q_matrix = np.zeros((self.N_STATES, self.N_ACTIONS))
+
+        self.Q_matrix = np.random.uniform(low=-0.01, high=0.01, size=(self.N_STATES, self.N_ACTIONS))
 
     def select_action(self, state):
         if random.uniform(0, 1) < self.epsilon:

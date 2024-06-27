@@ -11,6 +11,7 @@ public:
     float gps_lat;
     float bat;
     float volt;
+    String timestamp;
 
     MessagePayload();
     String toString();

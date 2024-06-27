@@ -4,6 +4,7 @@
 #include "BatteryManager.h"
 #include "LEDManager.h" 
 #include "MessagePayload.h"
+#include "TimerHelper.h"
 #include "WiFiManager.h"
 #include "AzureIoTManager.h"
 
@@ -14,20 +15,20 @@ WiFiManager wifiManager(SECRET_SSID, SECRET_PASS);
 AzureIoTManager azureIoTManager(SECRET_DEVICE_ID, SECRET_DEVICE_KEY, SECRET_BROKER, wifiManager);
 BatteryManager batteryManager; // Create an instance of BatteryManager
 LEDManager builtinLed(LED_BUILTIN); // Create an instance of LEDManager
+TimerHelper timeHelper(rtc);
 
 #include "./iotc_dps.h" // this one is not really used, because the device is already provisioned via python script
 
 
 enum SystemState {
     SENDING_TELEMETRY,
+    COLLECTING_TELEMETRY,
+    SLEEPING_SHORT,
     SLEEPING
 };
 
 // Working variables
 SystemState currentState = SENDING_TELEMETRY; // Initial state
-unsigned long lastMillis = 0;
-long lastStateChangeMillis = 0;
-long stateChangeInterval = 50000; // 50 seconds
 long MINIMUM_TELEMETRY_SEND_DURATION = 10000; // 10 seconds
 unsigned long startTime;
 
@@ -39,6 +40,7 @@ String createMessagePayload() {
     payload.gps_lat =  0.0 / 10.0; // Example coordinates
     payload.bat = batteryManager.readCharge();
     payload.volt = batteryManager.readVoltage();
+    payload.timestamp = timeHelper.getFormattedTime();
     return payload.toString();
 }
 
@@ -54,7 +56,6 @@ void setupPMIC() {
     if (!PMIC.disableBATFET()) { // Disable the battery charging
         Serial.println("Failed to disable charging");
     }
-
     PMIC.end();
 }
 
@@ -81,17 +82,14 @@ void sendTelemetry() {
     if (azureIoTManager.isConnected()) {
         Serial.println(F("Sending telemetry ..."));
         if (sensorReady) {
-            azureIoTManager.sendTelemetry(createMessagePayload());
+            String payload = createMessagePayload();
+            azureIoTManager.sendTelemetry(payload);
         } else {
             azureIoTManager.sendTelemetry("{\"error\": \"Connected, but sensor not ready\"}");
             Serial.println(F("Sensor not ready!"));
         }
     }
-    // Make sure enough time passes for sending before disconnecting
-    while (millis() - startTime < MINIMUM_TELEMETRY_SEND_DURATION) {
-        // Just loop here for 10,000 milliseconds (10 seconds)
-        // You can do other non-blocking tasks here if needed
-    }
+    timeHelper.pause(MINIMUM_TELEMETRY_SEND_DURATION, startTime);
     switchTolowPower();
 }
 
@@ -101,11 +99,7 @@ void setup() {
     Serial.println("Start!");
 
     // Loop to allow for upload on reset
-    startTime = millis();  // Record the start time
-    while (millis() - startTime < 20000) {
-        // Just loop here for 20,000 milliseconds (20 seconds)
-        // You can do other non-blocking tasks here if needed
-    }
+    timeHelper.pause(20000); // 20 seconds wait to allow for code upload
     Serial.println("20 seconds elapsed.");
 
     setupPMIC();

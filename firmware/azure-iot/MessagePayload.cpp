@@ -7,6 +7,7 @@ MessagePayload::MessagePayload() {
     gps_lat = 0.0;
     bat = 0.0;
     volt = 0.0;
+    timestamp = "";
 }
 
 String MessagePayload::toString() {
@@ -17,6 +18,7 @@ String MessagePayload::toString() {
     payload += "\"acc_z\": " + String(acc_z, 2) + ",";
     payload += "\"gps_lat\": " + String(gps_lat,2) + ",";
     payload += "\"bat\": " + String(bat, 5) + ",";
+    payload += "\"timestamp\": \"" + timestamp + "\",";
     payload += "\"volt\": " + String(volt, 4);
     payload += "}";
     return payload;

@@ -95,16 +95,18 @@ void collectTelemetry(){
     }
 }
 
-void sendTelemetry() {
+void collectAndSendTelemetry() {
     builtinLed.on();
-    bool wifiConnected = wifiManager.connectToWiFi();
+    bool wifiConnected = wifiManager.connectToWiFi(); 
     if (!wifiConnected) {
         Serial.println(F("[sendTelemetry] - Failed to connect to WiFi!"));
-        addMessageToQueue(createErrorMessage("[sendTelemetry] - Failed to connect to WiFi!"));
+        addMessageToQueue(createErrorMessage("[sendTelemetry] - Failed to connect to WiFi! Will Attempt to collect data, timestamp may be incorrect."));
+        collectTelemetry();
         return;
     }
     wifiManager.initializeTime();
     azureIoTManager.connect();
+    collectTelemetry();
 
     startTime = millis();  // Record the start time
     if (azureIoTManager.isConnected()) {
@@ -147,8 +149,7 @@ SystemState make_decision() {
 void loop() {
     switch (currentState) {
         case SENDING_TELEMETRY:
-            collectTelemetry();
-            sendTelemetry();
+            collectAndSendTelemetry();
             break;
         case COLLECTING_TELEMETRY:
             collectTelemetry();

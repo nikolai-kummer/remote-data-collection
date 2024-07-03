@@ -30,7 +30,11 @@ enum SystemState {
 // Working variables
 SystemState currentState = SENDING_TELEMETRY; // Initial state
 long MINIMUM_TELEMETRY_SEND_DURATION = 10000; // 10 seconds
+int SLEEP_DURATION_MINUTES = 30; // Sleep time in minutes
 unsigned long startTime;
+
+String messageQueue[24];
+int queueIndex = 0;
 
 String createMessagePayload() {
     MessagePayload payload;
@@ -42,6 +46,19 @@ String createMessagePayload() {
     payload.volt = batteryManager.readVoltage();
     payload.timestamp = timeHelper.getFormattedTime();
     return payload.toString();
+}
+
+String createErrorMessage(String error) {
+    return "{\"error\": \"" + error + "\", \"timestamp\": \"" + timeHelper.getFormattedTime() + "\"}";
+}
+
+void addMessageToQueue(String message) {
+    if (queueIndex < 24) {
+        messageQueue[queueIndex] = message;
+        queueIndex++;
+    } else {
+        Serial.println(F("Message queue full!"));
+    }
 }
 
 void setupPMIC() {
@@ -66,13 +83,24 @@ void switchTolowPower(){
     builtinLed.off();
 }
 
+void collectTelemetry(){
+    bool sensorReady = batteryManager.begin();
+    if (sensorReady) {
+        String payload = createMessagePayload();
+        addMessageToQueue(payload);
+        Serial.println(payload);
+    } else {
+        addMessageToQueue(createErrorMessage("[collectTelemetry] - Sensor not ready!"));
+        Serial.println(F("[collectTelemetry] - Sensor not ready!"));
+    }
+}
+
 void sendTelemetry() {
     builtinLed.on();
-    bool sensorReady = batteryManager.begin();
     bool wifiConnected = wifiManager.connectToWiFi();
     if (!wifiConnected) {
-        Serial.println(F("Failed to connect to WiFi!"));
-        switchTolowPower();
+        Serial.println(F("[sendTelemetry] - Failed to connect to WiFi!"));
+        addMessageToQueue(createErrorMessage("[sendTelemetry] - Failed to connect to WiFi!"));
         return;
     }
     wifiManager.initializeTime();
@@ -81,16 +109,16 @@ void sendTelemetry() {
     startTime = millis();  // Record the start time
     if (azureIoTManager.isConnected()) {
         Serial.println(F("Sending telemetry ..."));
-        if (sensorReady) {
-            String payload = createMessagePayload();
-            azureIoTManager.sendTelemetry(payload);
-        } else {
-            azureIoTManager.sendTelemetry("{\"error\": \"Connected, but sensor not ready\"}");
-            Serial.println(F("Sensor not ready!"));
+        for (int i = 0; i < queueIndex; i++) {
+            azureIoTManager.sendTelemetry(messageQueue[i]);
+            delay(100); 
         }
+        queueIndex = 0; // Reset the queue after sending all messages
+
+    } else {
+        addMessageToQueue(createErrorMessage("[sendTelemetry] - Failed to connect to azureIoTManager!"));
     }
     timeHelper.pause(MINIMUM_TELEMETRY_SEND_DURATION, startTime);
-    switchTolowPower();
 }
 
 
@@ -105,23 +133,36 @@ void setup() {
     setupPMIC();
 }
 
-void loop() {
-    unsigned long currentMillis = millis();
-
+SystemState make_decision() {
+    // Randomly decide the next state
     switch (currentState) {
         case SENDING_TELEMETRY:
-            sendTelemetry();
-            currentState = SLEEPING;
-            break;
+            return COLLECTING_TELEMETRY;
+        case COLLECTING_TELEMETRY:
+            return SENDING_TELEMETRY;
+    }
+    return SLEEPING; // Default to SLEEPING
+}
 
-        case SLEEPING:
-            Serial.println(("Sleeping ..."));
-            //Sleep for a few minutes
-            for (int i = 0; i < 30; i++) {
-                LowPower.deepSleep(60*1000);
-            }
-            currentState = SENDING_TELEMETRY;
+void loop() {
+    switch (currentState) {
+        case SENDING_TELEMETRY:
+            collectTelemetry();
+            sendTelemetry();
             break;
+        case COLLECTING_TELEMETRY:
+            collectTelemetry();
+            Serial.println(("Collecting telemetry ..."));
+            break;
+        case SLEEPING:
+            currentState = COLLECTING_TELEMETRY;
+    }
+    currentState = make_decision();
+    switchTolowPower();
+
+    Serial.println(("Sleeping ..."));
+    for (int i = 0; i < SLEEP_DURATION_MINUTES; i++) {
+        LowPower.deepSleep(60*1000);
     }
     delay(50); // Small delay to prevent looping too quickly, adjust as necessary
 }

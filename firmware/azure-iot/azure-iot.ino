@@ -7,6 +7,7 @@
 #include "TimerHelper.h"
 #include "WiFiManager.h"
 #include "AzureIoTManager.h"
+#include "MessageManager.h"
 
 #include "arduino_secrets.h"
 
@@ -16,6 +17,7 @@ AzureIoTManager azureIoTManager(SECRET_DEVICE_ID, SECRET_DEVICE_KEY, SECRET_BROK
 BatteryManager batteryManager; // Create an instance of BatteryManager
 LEDManager builtinLed(LED_BUILTIN); // Create an instance of LEDManager
 TimerHelper timeHelper(rtc);
+MessageManager messageManager(timeHelper);
 
 #include "./iotc_dps.h" // this one is not really used, because the device is already provisioned via python script
 
@@ -33,9 +35,6 @@ long MINIMUM_TELEMETRY_SEND_DURATION = 10000; // 10 seconds
 int SLEEP_DURATION_MINUTES = 30; // Sleep time in minutes
 unsigned long startTime;
 
-String messageQueue[24];
-int queueIndex = 0;
-
 String createMessagePayload() {
     MessagePayload payload;
     payload.acc_x = 0.0 / 10.0;
@@ -48,18 +47,6 @@ String createMessagePayload() {
     return payload.toString();
 }
 
-String createErrorMessage(String error) {
-    return "{\"error\": \"" + error + "\", \"timestamp\": \"" + timeHelper.getFormattedTime() + "\"}";
-}
-
-void addMessageToQueue(String message) {
-    if (queueIndex < 24) {
-        messageQueue[queueIndex] = message;
-        queueIndex++;
-    } else {
-        Serial.println(F("Message queue full!"));
-    }
-}
 
 void setupPMIC() {
     // Start the Power Management IC and disable a bunch of power hoggers
@@ -87,20 +74,19 @@ void collectTelemetry(){
     bool sensorReady = batteryManager.begin();
     if (sensorReady) {
         String payload = createMessagePayload();
-        addMessageToQueue(payload);
+        messageManager.addMessage(payload);
         Serial.println(payload);
     } else {
-        addMessageToQueue(createErrorMessage("[collectTelemetry] - Sensor not ready!"));
+        messageManager.addErrorMessage("[collectTelemetry] - Sensor not ready!");
         Serial.println(F("[collectTelemetry] - Sensor not ready!"));
     }
 }
 
 void collectAndSendTelemetry() {
-    builtinLed.on();
     bool wifiConnected = wifiManager.connectToWiFi(); 
     if (!wifiConnected) {
         Serial.println(F("[sendTelemetry] - Failed to connect to WiFi!"));
-        addMessageToQueue(createErrorMessage("[sendTelemetry] - Failed to connect to WiFi! Will Attempt to collect data, timestamp may be incorrect."));
+        messageManager.addErrorMessage("[sendTelemetry] - Failed to connect to WiFi! Will Attempt to collect data, timestamp may be incorrect.");
         collectTelemetry();
         return;
     }
@@ -111,14 +97,14 @@ void collectAndSendTelemetry() {
     startTime = millis();  // Record the start time
     if (azureIoTManager.isConnected()) {
         Serial.println(F("Sending telemetry ..."));
-        for (int i = 0; i < queueIndex; i++) {
-            azureIoTManager.sendTelemetry(messageQueue[i]);
+        int attempts = 0;
+        while (messageManager.hasMessages() && attempts < 25) {
+            azureIoTManager.sendTelemetry(messageManager.getNextMessage());
             delay(100); 
+            attempts++;
         }
-        queueIndex = 0; // Reset the queue after sending all messages
-
     } else {
-        addMessageToQueue(createErrorMessage("[sendTelemetry] - Failed to connect to azureIoTManager!"));
+        messageManager.addErrorMessage("[sendTelemetry] - Failed to connect to azureIoTManager!");
     }
     timeHelper.pause(MINIMUM_TELEMETRY_SEND_DURATION, startTime);
 }
@@ -147,6 +133,7 @@ SystemState make_decision() {
 }
 
 void loop() {
+    builtinLed.on();
     switch (currentState) {
         case SENDING_TELEMETRY:
             collectAndSendTelemetry();

@@ -1,4 +1,5 @@
 build/
 __pycache__/
+.pyc
 .vscode
 arduino_secrets.h

@@ -1,20 +1,20 @@
 import yaml
 from train import train
-from agent.dqn_agent import DQNAgent
+from agent.baseline_agent import BaselineAgent
 from environment.custom_env import CustomEnv
 
 def main():
     # Load configuration
-    with open('config.yaml', 'r') as f:
+    with open('config_baseline.yaml', 'r') as f:
         config = yaml.safe_load(f)
     
     # Initialize environment and agent
     env = CustomEnv(config['env'])
-    agent = DQNAgent(config['agent'], env)
+    baseline_agent = BaselineAgent(env)
 
-    # Start training
+    # Try out baseline agent
     env.cloudy_chance = 1.0
-    train(env, agent, config['train'])
+    train(env, baseline_agent, config['train'])
     
     
 

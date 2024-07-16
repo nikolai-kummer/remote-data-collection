@@ -15,7 +15,7 @@ def get_reward(action, current_power, message_count):
     if action == 0:
         reward -= 0
     elif action == 1:
-        reward += 0.1
+        reward += 0.3*20
     elif action == 2:
         if message_count > 0:
             reward += message_count
@@ -34,7 +34,7 @@ def train(env: CustomEnv, agent, train_config):
     legitimate_messages_list = []
 
     for episode in range(num_episodes):
-        env.init_state(power_level=50, time=16, message_count=0)
+        env.init_state(power_level=100, time=0, message_count=0)
         total_reward = 0
         power_list = []
         action_list = []
@@ -70,11 +70,10 @@ def train(env: CustomEnv, agent, train_config):
     plot_results(reward_list, "Rewards")
     plot_results(legitimate_messages_list, "Legitimate Messages")
     plot_results(power_list, "Legitimate Messages")
-
     
     values, counts = np.unique(action_list, return_counts=True)
     plt.figure(figsize=(8, 4))
-    plt.bar(env.action_list, counts, color='skyblue')
+    plt.bar([env.action_list[i] for i in values], counts, color='skyblue')
     print("Waiting for plot")
     save_results('results/reward_list.csv', reward_list)
     save_results('results/legitimate_messages_list.csv', legitimate_messages_list)

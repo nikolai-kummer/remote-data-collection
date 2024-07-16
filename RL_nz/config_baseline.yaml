@@ -7,11 +7,5 @@ env:
   max_messages: 5
   power_levels: 20
 
-agent:
-  alpha: 0.4
-  gamma: 0.6
-  epsilon: 0.5
-  epsilon_decay: 0.999
-
 train:
-  num_episodes: 100
+  num_episodes: 1

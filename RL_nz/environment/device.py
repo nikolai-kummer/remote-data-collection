@@ -10,9 +10,9 @@ class Device:
     def __init__(self,
                  power_level: float = 1050.0,
                  power_max: float = 2100.0,
-                 power_idle: float = 1.0,
-                 power_transmit: float = 10.0,
-                 power_collect: float = 1.0,
+                 power_idle: float = 12.0, # baseline consumption always deducted
+                 power_transmit: float = 8.0, # consumption for a single transmission
+                 power_collect: float = 1.2, # consumption for a single collection
                  rounding_factor: int = 5
                  ) -> None:
         
@@ -36,7 +36,7 @@ class Device:
     
     def calculate_rounded_power_level(self) -> int:
         """ Returns the power level as percentage of the maximum power level. Rounded to the nearest integer."""
-        return int((self._power_current / self._power_max)/self._rounding_factor*100.0)
+        return int((self._power_current / self._power_max)*100.0/self._rounding_factor)
         
     def take_action(self, action: int) -> None:
         """ Takes an action and updates the power level accordingly. """

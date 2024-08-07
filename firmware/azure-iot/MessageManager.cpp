@@ -4,7 +4,7 @@ MessageManager::MessageManager(TimerHelper& timeHelper)
     : timeHelper(timeHelper), queueIndex(0) {}
 
 void MessageManager::addMessage(String message) {
-    if (queueIndex < 24) {
+    if (queueIndex < MAX_QUEUE_SIZE) {
         messageQueue[queueIndex] = message;
         queueIndex++;
     } else {

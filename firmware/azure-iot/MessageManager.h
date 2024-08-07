@@ -6,6 +6,8 @@
 
 class MessageManager {
 public:
+    static const int MAX_QUEUE_SIZE = 25;
+    
     MessageManager(TimerHelper& timeHelper);
     void addMessage(String message);
     String addErrorMessage(String error);
@@ -13,7 +15,7 @@ public:
     bool hasMessages();
 
 private:
-    String messageQueue[24];
+    String messageQueue[MAX_QUEUE_SIZE];
     int queueIndex;
     TimerHelper& timeHelper;
 };

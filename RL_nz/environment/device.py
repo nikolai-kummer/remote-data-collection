@@ -10,9 +10,9 @@ class Device:
     def __init__(self,
                  power_level: float = 1050.0,
                  power_max: float = 2100.0,
-                 power_idle: float = 12.0, # baseline consumption always deducted
-                 power_transmit: float = 8.0, # consumption for a single transmission
-                 power_collect: float = 1.2, # consumption for a single collection
+                 power_idle: float = 5.0, # baseline consumption always deducted
+                 power_transmit: float = 1.6, # consumption for a single transmission
+                 power_collect: float = 0.1, # consumption for a single collection
                  rounding_factor: int = 5
                  ) -> None:
         

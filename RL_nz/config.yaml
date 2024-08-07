@@ -14,4 +14,4 @@ agent:
   epsilon_decay: 0.999
 
 train:
-  num_episodes: 100
+  num_episodes: 5000

@@ -69,7 +69,7 @@ def train(env: CustomEnv, agent, train_config):
 
     plot_results(reward_list, "Rewards")
     plot_results(legitimate_messages_list, "Legitimate Messages")
-    plot_results(power_list, "Legitimate Messages")
+    plot_results(power_list, "Power Level", "Time")
     
     values, counts = np.unique(action_list, return_counts=True)
     plt.figure(figsize=(8, 4))

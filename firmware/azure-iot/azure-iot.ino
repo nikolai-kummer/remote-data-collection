@@ -31,7 +31,7 @@ enum SystemState {
 
 // Working variables
 SystemState currentState = SENDING_TELEMETRY; // Initial state
-long MINIMUM_TELEMETRY_SEND_DURATION = 10000; // 10 seconds
+long MINIMUM_TELEMETRY_SEND_DURATION = 120000; // 10 seconds
 int SLEEP_DURATION_MINUTES = 30; // Sleep time in minutes
 unsigned long startTime;
 
@@ -47,6 +47,12 @@ String createMessagePayload() {
     return payload.toString();
 }
 
+void resetPMICWatchdog() {
+    // Reset the watchdog timer
+    PMIC.begin();
+    PMIC.resetWatchdog();
+    PMIC.end();
+}
 
 void setupPMIC() {
     // Start the Power Management IC and disable a bunch of power hoggers
@@ -54,6 +60,7 @@ void setupPMIC() {
         Serial.println("Failed to initialize PMIC");
         return;
     }
+
     if (!PMIC.disableWatchdog()) { // Disable the watchdog timer starts blinking the LED after a while
         Serial.println("Failed to disable watchdog");
     }
@@ -68,6 +75,7 @@ void switchTolowPower(){
     wifiManager.disconnectWiFi();
     batteryManager.end();
     builtinLed.off();
+    timeHelper.pause(50);
 }
 
 void collectTelemetry(){
@@ -114,22 +122,22 @@ void setup() {
     Serial.begin(115200);
     Serial.println("Start!");
 
-    // Loop to allow for upload on reset
-    timeHelper.pause(20000); // 20 seconds wait to allow for code upload
+    // Pause to allow for 20 seconds for any code upload on reset
+    timeHelper.pause(20000); 
     Serial.println("20 seconds elapsed.");
 
     setupPMIC();
 }
 
 SystemState make_decision() {
-    // Randomly decide the next state
-    switch (currentState) {
-        case SENDING_TELEMETRY:
-            return COLLECTING_TELEMETRY;
-        case COLLECTING_TELEMETRY:
-            return SENDING_TELEMETRY;
-    }
-    return SLEEPING; // Default to SLEEPING
+    // if (collect_count < collect_threshold) {
+    //     collect_count++;
+    //     return COLLECTING_TELEMETRY;
+    // } else {
+    //     collect_count = 0; // Reset counter after sending telemetry
+    //     return SENDING_TELEMETRY;
+    // }
+    return SLEEPING;
 }
 
 void loop() {
@@ -151,6 +159,7 @@ void loop() {
     Serial.println(("Sleeping ..."));
     for (int i = 0; i < SLEEP_DURATION_MINUTES; i++) {
         LowPower.deepSleep(60*1000);
+        resetPMICWatchdog();
     }
     delay(50); // Small delay to prevent looping too quickly, adjust as necessary
 }

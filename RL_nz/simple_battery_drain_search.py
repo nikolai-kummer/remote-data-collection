@@ -3,7 +3,7 @@ import time
 import yaml
 
 from skopt import gp_minimize
-from skopt.space import Real
+from skopt.space import Real, Integer
 from skopt.utils import use_named_args
 from train import train, set_seed
 from agent.dqn_agent import DQNAgent
@@ -12,11 +12,12 @@ from environment.custom_env import CustomEnv
 
 def main():
     # Load base configuration
-    with open('config.yaml', 'r') as f:
+    with open('simple_battery_drain_optimum.yaml', 'r') as f:
         config = yaml.safe_load(f)
 
     # Define the search space
     space = [
+        Integer(1000, 5000,  name='num_episodes'),
         Real(-15.0, 0.0, name='reward_power_loss'),
         Real(0.0001, 0.01, name='reward_power_multiplier'),
         Real(-2.0, 2.0, name='reward_action_0'),
@@ -52,7 +53,9 @@ def main():
         
         elapsed_time = time.time() - start_time
         print(f'Median Sent Messages: {median_message_count} -> Time Elapsed: {elapsed_time:.2f} seconds -> Parameters: {params}')
-        
+        # Append parameters to a CSV file
+        with open('parameters.csv', 'a') as f:
+            f.write(str(median_message_count) + ',' + ','.join(str(params[param]) for param in params) + ',' + '\n')
         # We want to maximize the number of sent messages
         return -median_message_count  # Negative because gp_minimize minimizes the function
     

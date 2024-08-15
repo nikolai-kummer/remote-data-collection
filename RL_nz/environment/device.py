@@ -23,6 +23,7 @@ class Device:
         self._power_collect = power_collect
         self._rounding_factor = rounding_factor
         self._message_queue_length = 0
+        self._max_message_queue_length = 5
         pass
 
     
@@ -46,14 +47,14 @@ class Device:
         elif action == 1:
             power_consumed = self._power_idle + self._power_collect
             if self._power_current >= power_consumed:
-                self._message_queue_length += 1
-            self._power_current -= (self._power_idle + self._power_collect)
+                self._message_queue_length = min(self._message_queue_length+1, self._max_message_queue_length)
+            self._power_current -= power_consumed
         elif action == 2:
             power_consumed = self._power_idle + self._power_transmit
             if self._power_current >= power_consumed:
-                messages_send = self._message_queue_length+1
+                messages_send = min(self._message_queue_length + 1, self._max_message_queue_length)
                 self._message_queue_length = 0
-            self._power_current -= (self._power_idle + self._power_transmit)
+            self._power_current -= power_consumed
         else:
             raise ValueError("Invalid action")
         self._power_current = max(0, self._power_current)

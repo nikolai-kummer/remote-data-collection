@@ -14,7 +14,7 @@ def main():
 
     # Try out baseline agent
     env.cloudy_chance = 1.0
-    train(env, baseline_agent, config['train'])
+    train(env, baseline_agent, config['train'], plot_result_flag=True, result_prefix="baseline_")
     
     
 

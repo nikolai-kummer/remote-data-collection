@@ -1,11 +1,11 @@
 import yaml
-from train import train
+from train import train, set_seed
 from agent.dqn_agent import DQNAgent
 from environment.custom_env import CustomEnv
 
 def main():
     # Load configuration
-    with open('config.yaml', 'r') as f:
+    with open('simple_battery_drain_optimum.yaml', 'r') as f:
         config = yaml.safe_load(f)
     
     # Initialize environment and agent
@@ -14,7 +14,8 @@ def main():
 
     # Start training
     env.cloudy_chance = 1.0
-    train(env, agent, config['train'])
+    set_seed(42)
+    message_count = train(env, agent, config['train'], plot_result_flag=True, result_prefix="simple_battery_drain_optimum_")
     
     
 

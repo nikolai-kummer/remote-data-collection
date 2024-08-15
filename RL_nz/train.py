@@ -1,25 +1,33 @@
+import random
+
 from utils.plot import plot_results
 from environment.custom_env import CustomEnv
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-def get_reward(action, current_power, message_count):
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+
+def get_reward(action, current_power, message_count, train_config):
     reward = 0
 
     if current_power <= 0:
-        reward -= 10
+        reward += train_config['reward_power_loss']
     else:
-        reward += current_power * 0.001
+        reward += current_power * train_config['reward_power_multiplier']
 
     if action == 0:
-        reward -= 0
+        reward += train_config['reward_action_0']
     elif action == 1:
-        reward += 0.3*20
+        reward += train_config['reward_action_1']
     elif action == 2:
         if message_count > 0:
-            reward += message_count
+            reward += train_config['reward_action_2'] + (message_count * train_config['reward_message_count'])
+
     return reward
+
 
 def save_results(filename, data):
     import csv
@@ -28,7 +36,7 @@ def save_results(filename, data):
         writer.writerow(["Episode", "Value"])
         writer.writerows(enumerate(data, 1))
 
-def train(env: CustomEnv, agent, train_config):
+def train(env: CustomEnv, agent, train_config, plot_result_flag:bool=True, result_prefix:str="") -> int:
     num_episodes = train_config['num_episodes']
     reward_list = []
     legitimate_messages_list = []
@@ -47,7 +55,7 @@ def train(env: CustomEnv, agent, train_config):
                 legitimate_messages = env.transition(action)
                 
                 current_power = env.get_power()
-                reward = get_reward(action, current_power, legitimate_messages)
+                reward = get_reward(action, current_power, legitimate_messages, train_config)
                 power_list.append(current_power)
                 action_list.append(action)
                 legitimate_messages_sent_this_episode += legitimate_messages
@@ -57,23 +65,21 @@ def train(env: CustomEnv, agent, train_config):
         agent.decay_epsilon()
         reward_list.append(total_reward)
         legitimate_messages_list.append(legitimate_messages_sent_this_episode)
-        print(f'Episode {episode+1}: Total Reward = {total_reward}, Legitimate Messages Sent = {legitimate_messages_sent_this_episode}')
-
-        # if episode % 1000 == 0:
-        # #     plot_results(power_list, "Power Distribution")
-        #     values, counts = np.unique(action_list, return_counts=True)
-        #     plt.figure(figsize=(8, 4))
-        #     plt.bar(env.action_list, counts, color='skyblue')
-        #     plt.show()
+        if plot_result_flag:
+            print(f'Episode {episode+1}: Total Reward = {total_reward}, Legitimate Messages Sent = {legitimate_messages_sent_this_episode}')
                 
 
-    plot_results(reward_list, "Rewards")
-    plot_results(legitimate_messages_list, "Legitimate Messages")
-    plot_results(power_list, "Power Level", "Time")
-    
-    values, counts = np.unique(action_list, return_counts=True)
-    plt.figure(figsize=(8, 4))
-    plt.bar([env.action_list[i] for i in values], counts, color='skyblue')
-    print("Waiting for plot")
-    save_results('results/reward_list.csv', reward_list)
-    save_results('results/legitimate_messages_list.csv', legitimate_messages_list)
+    if plot_result_flag:
+        plot_results(reward_list, "Rewards")
+        plot_results(legitimate_messages_list, "Legitimate Messages")
+        plot_results(power_list, "Power Level", "Time")
+        
+        values, counts = np.unique(action_list, return_counts=True)
+        plt.figure(figsize=(8, 4))
+        plt.bar([env.action_list[i] for i in values], counts, color='skyblue')
+        print("Waiting for plot")
+        save_results(f'results/{result_prefix}reward_list.csv', reward_list)
+        save_results(f'results/{result_prefix}legitimate_messages_list.csv', legitimate_messages_list)
+        save_results(f'results/{result_prefix}power_list.csv', power_list)
+        
+    return legitimate_messages_list[-1]

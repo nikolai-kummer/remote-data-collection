@@ -1,11 +1,17 @@
 env:
-  max_power: 2100
+  max_power: 1300
   min_power: 0
-  n_days: 3
+  n_days: 6
   time_intervals: 48
   action_list: ['sleep', 'collect', 'send all']
   max_messages: 5
-  power_levels: 20
+  power_levels: 400
 
 train:
   num_episodes: 1
+  reward_power_loss: 0.0
+  reward_power_multiplier: 0.0001
+  reward_action_0: -0.5885436726404254
+  reward_action_1: -0.7353431237036132
+  reward_action_2: -2.0
+  reward_message_count: 0.8863782281442544

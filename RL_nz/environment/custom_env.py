@@ -26,7 +26,8 @@ class CustomEnv:
         self.N_POWER_LEVELS = config['power_levels']
         self.MAX_MESSAGES = config['max_messages'] 
         self._device = Device(power_max=config['max_power'],
-                              rounding_factor=int(100/self.N_POWER_LEVELS))
+                              rounding_factor=(100/self.N_POWER_LEVELS))
+                            #   rounding_factor=int(100/self.N_POWER_LEVELS))
         self._time = 0
         self.current_day = 0
         self.cloudy_chance = 0.7

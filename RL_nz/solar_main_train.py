@@ -1,6 +1,8 @@
+
 import yaml
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import date
 
 from train import train, set_seed
 from agent.dqn_agent import DQNAgent
@@ -17,11 +19,14 @@ def main():
 
     # Start training
     env.cloudy_chance = 0.8
-    message_list, power_list = train(env, agent, config['train'], plot_result_flag=True, result_prefix="simple_battery_drain_optimum_")
+    message_list, power_list = train(env, agent, config['train'], plot_result_flag=True, result_prefix="solar_collection_optimum_")
     
-    print(f"Average messages sent: {np.median(message_list)}")
-    print(f"Average power: {np.median(power_list)}")
+    print(f"Average messages sent: {np.median(message_list[-1000:])}")
+    print(f"Average power: {np.median(power_list[-1000:])}")
     
+    # Save the Q-matrix and add the date to the filename
+    filename = f"./results/models/{date.today().strftime('%Y-%m-%d')}_solar_collection_optimum_q_matrix.npy"
+    agent.save_q_matrix(filename)
     
         # show a side by side plot with the power and messages
     fig, axs = plt.subplots(2, figsize=(7, 8))
@@ -45,15 +50,6 @@ def main():
     
     
     print('Complete')    
-    # # show a side by side plot with the power and messages
-    # fig, axs = plt.subplots(2)
-    # fig.suptitle("RL Agent")
-    # # axs[0].hist(power_list[-1000:])
-    # axs[0].set_title("Power")
-    # axs[1].hist(message_list[-1000:])
-    # axs[1].set_title("Messages Sent")
-    # plt.show()
-
 
 if __name__ == "__main__":
     set_seed(42)

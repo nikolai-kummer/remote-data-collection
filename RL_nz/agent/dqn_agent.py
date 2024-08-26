@@ -1,4 +1,5 @@
 import numpy as np
+import os
 import random
 from collections import deque
 
@@ -50,11 +51,20 @@ class DQNAgent:
 
         self.memory.clear()  # Clear memory after updating
 
-    # def update_q_value(self, state, action, reward, next_state):
-    #     best_next_action = np.argmax(self.Q_matrix[next_state])
-    #     td_target = reward + self.gamma * self.Q_matrix[next_state][best_next_action]
-    #     td_error = td_target - self.Q_matrix[state][action]
-    #     self.Q_matrix[state][action] += self.alpha * td_error
+    def update_q_value_one_step(self, state, action, reward, next_state):
+        best_next_action = np.argmax(self.Q_matrix[next_state])
+        td_target = reward + self.gamma * self.Q_matrix[next_state][best_next_action]
+        td_error = td_target - self.Q_matrix[state][action]
+        self.Q_matrix[state][action] += self.alpha * td_error
 
     def decay_epsilon(self):
         self.epsilon *= self.epsilon_decay
+        
+    def save_q_matrix(self, filename):
+        # check if folder exists
+        folder = os.path.dirname(filename)
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        
+        np.save(filename, self.Q_matrix)
+        

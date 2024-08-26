@@ -1,5 +1,11 @@
-build/
+# Compiled Python files
+*.py[cod]
 __pycache__/
-.pyc
-.vscode
+
+# Build directories
+build/
+
+# VS Code directory
+.vscode/
+
 arduino_secrets.h

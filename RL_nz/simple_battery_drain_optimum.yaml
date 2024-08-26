@@ -9,6 +9,7 @@ env:
   n_step: 5
 
 agent:
+  n_step: 5
   alpha: 0.1
   gamma: 0.9
   epsilon: 1.0
@@ -22,3 +23,5 @@ train:
   reward_action_1: -0.7353431237036132
   reward_action_2: -2.0
   reward_message_count: 0.8863782281442544
+
+#Best Parameters: [5000, 0.0, 0.0001, -1.873296736728921, -0.6489876722057264, -2.0, 0.8640073325132345] -> Highest Sent Messages: 252.0

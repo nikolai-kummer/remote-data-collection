@@ -12,12 +12,12 @@ from environment.custom_env import CustomEnv
 
 def main():
     # Load base configuration
-    with open('simple_battery_drain_optimum.yaml', 'r') as f:
+    with open('solar_config.yaml', 'r') as f:
         config = yaml.safe_load(f)
 
     # Define the search space
     space = [
-        Integer(1000, 5000,  name='num_episodes'),
+        # Integer(3000, 6000,  name='num_episodes'),
         Real(-15.0, 0.0, name='reward_power_loss'),
         Real(0.0001, 0.01, name='reward_power_multiplier'),
         Real(-2.0, 2.0, name='reward_action_0'),
@@ -32,6 +32,7 @@ def main():
         
         # Run the training process multiple times to reduce noise
         message_counts = []
+        power_averages = []
         for i in range(4):
             # Set the seed for reproducibility
             set_seed(42 + i)  # Vary the seed slightly for each run
@@ -44,20 +45,22 @@ def main():
             agent = DQNAgent(config['agent'], env)
 
             # Start training
-            env.cloudy_chance = 1.0
-            message_count_list,_ = train(env, agent, config['train'], plot_result_flag=False)
-            message_counts.append(message_count_list[-1])
+            env.cloudy_chance = 0.8
+            message_count_list, power_list = train(env, agent, config['train'], plot_result_flag=False)
+            message_counts.append(np.median(message_count_list[-1000:]))
+            power_averages.append(np.median(power_list[-1000:]))
         
         # Calculate the median of the message counts
         median_message_count = np.median(message_counts)
+        power_list = np.mean(power_averages)
         
         elapsed_time = time.time() - start_time
-        print(f'Median Sent Messages: {median_message_count} -> Time Elapsed: {elapsed_time:.2f} seconds -> Parameters: {params}')
+        print(f'Median Sent Messages: {median_message_count} ({power_list})-> Time Elapsed: {elapsed_time:.2f} seconds -> Parameters: {params}')
         # Append parameters to a CSV file
-        with open('parameters.csv', 'a') as f:
-            f.write(str(median_message_count) + ',' + ','.join(str(params[param]) for param in params) + ',' + '\n')
+        with open('solar_parameters.csv', 'a') as f:
+            f.write(str(median_message_count) + ',' + str(power_list) +',' + ','.join(str(params[param]) for param in params) + ',' + '\n')
         # We want to maximize the number of sent messages
-        return -median_message_count  # Negative because gp_minimize minimizes the function
+        return -median_message_count
     
     # Perform Bayesian Optimization
     result = gp_minimize(objective, space, n_calls=400, random_state=0)

@@ -1,10 +1,11 @@
+import matplotlib.pyplot as plt
+import numpy as np
 import random
 
-from utils.plot import plot_results
 from environment.custom_env import CustomEnv
+from utils.plot import plot_results
+from typing import List, Tuple
 
-import numpy as np
-import matplotlib.pyplot as plt
 
 def set_seed(seed):
     random.seed(seed)
@@ -36,7 +37,7 @@ def save_results(filename, data):
         writer.writerow(["Episode", "Value"])
         writer.writerows(enumerate(data, 1))
 
-def train(env: CustomEnv, agent, train_config, plot_result_flag:bool=True, result_prefix:str="") -> int:
+def train(env: CustomEnv, agent, train_config, plot_result_flag:bool=True, result_prefix:str="") -> Tuple[List[int], List[float]]:
     num_episodes = train_config['num_episodes']
     reward_list = []
     legitimate_messages_list = []
@@ -77,9 +78,10 @@ def train(env: CustomEnv, agent, train_config, plot_result_flag:bool=True, resul
         values, counts = np.unique(action_list, return_counts=True)
         plt.figure(figsize=(8, 4))
         plt.bar([env.action_list[i] for i in values], counts, color='skyblue')
+        plt.show()
         print("Waiting for plot")
         save_results(f'results/{result_prefix}reward_list.csv', reward_list)
         save_results(f'results/{result_prefix}legitimate_messages_list.csv', legitimate_messages_list)
         save_results(f'results/{result_prefix}power_list.csv', power_list)
         
-    return legitimate_messages_list[-1]
+    return legitimate_messages_list, power_list

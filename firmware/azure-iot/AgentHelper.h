@@ -1,8 +1,8 @@
 #ifndef AGENTHELPER_H
 #define AGENTHELPER_H
 
-#include <map>
-#include <string>
+#include <cstdint>
+#include <avr/pgmspace.h>
 
 class AgentHelper {
 public:
@@ -15,9 +15,11 @@ public:
 private:
     int N_TIME_INTERVALS;
     int MAX_MESSAGES;
-    std::map<int, int> stateActionMap; // Map of state to action
 
-    void initializeStateActionMap(); // Declaration only
+    // Array to store packed actions in flash memory
+    static const uint32_t stateAction[] PROGMEM;
+
+    void initializeStateActionMap(); // No need to implement; handled in StateActionMap.h
 };
 
 #endif // AGENTHELPER_H

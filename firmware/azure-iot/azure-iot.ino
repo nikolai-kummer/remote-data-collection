@@ -129,6 +129,20 @@ void setup() {
     Serial.println("20 seconds elapsed.");
 
     setupPMIC();
+
+    // Print random state->action pairs for validation of model read
+    int statesToTest[] = {0,1,2,15,16,258, 2000, 3000, 20000, 24740};
+    int numStates = sizeof(statesToTest) / sizeof(statesToTest[0]);
+
+    // Print the actions corresponding to the test states
+    for (int i = 0; i < numStates; i++) {
+        int state = statesToTest[i];
+        int action = agentHelper.getAction(state);
+        Serial.print("State: ");
+        Serial.print(state);
+        Serial.print(" -> Action: ");
+        Serial.println(action);
+    }
 }
 
 SystemState make_decision() {
@@ -139,8 +153,8 @@ SystemState make_decision() {
     int state = agentHelper.encodeState(powerLevel, timeInterval, messageCount);
     int action = agentHelper.getAction(state);
 
-    if (action == -1) {
-        return SLEEPING;
+    if (action < 0 || action > 2) {
+        return SENDING_TELEMETRY;
     }
     return static_cast<SystemState>(action);
 }

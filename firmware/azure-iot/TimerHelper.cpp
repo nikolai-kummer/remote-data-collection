@@ -40,3 +40,12 @@ String TimerHelper::getFormattedTime() {
 
     return formattedTime;
 }
+
+int TimerHelper::getHalfHourInterval() {
+    int hours = _rtc.getHours();    // Get the current hour (0-23)
+    int minutes = _rtc.getMinutes(); // Get the current minute (0-59)
+    
+    int halfHourInterval = (hours * 2) + (minutes / 30);
+    return halfHourInterval;
+}
+

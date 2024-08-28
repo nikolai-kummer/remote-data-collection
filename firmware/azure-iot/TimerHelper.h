@@ -10,6 +10,7 @@ public:
     static void pause(unsigned long duration, unsigned long startTime);
     static void pause(unsigned long duration);
     String getFormattedTime(); // Function to get formatted time string
+    int getHalfHourInterval(); // Add this function declaration
 
 private:
     RTCZero& _rtc;  // Reference to the RTCZero instance

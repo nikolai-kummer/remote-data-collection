@@ -94,8 +94,10 @@ def on_message(client, userdata, msg):
 
 # Test the function
 scope_id = '0ne00CC8719'
-device_id = 'eco-tracker-01'  # Use your device MAC address without colons
-key = "hfIS/chAaNR8XSQb0IvumGSpyaEWJ3eGIrmqgplqtD8="
+# device_id = 'eco-tracker-01'  # Use your device MAC address without colons
+device_id = 'eco-tracker-02'  # Use your device MAC address without colons
+# key = "hfIS/chAaNR8XSQb0IvumGSpyaEWJ3eGIrmqgplqtD8=" # for device eco-tracker-01
+key = "6/NQH/2FZ/FtqB57K+ziBzdkTDVgyIiqC87P9kVzKEo="
 
 device_id, assigned_hub, device_key = provision_device(scope_id, device_id, key)
 if device_id and assigned_hub:

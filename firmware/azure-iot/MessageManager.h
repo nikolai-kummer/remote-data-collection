@@ -6,13 +6,14 @@
 
 class MessageManager {
 public:
-    static const int MAX_QUEUE_SIZE = 25;
+    static const int MAX_QUEUE_SIZE = 5;
     
     MessageManager(TimerHelper& timeHelper);
     void addMessage(String message);
     String addErrorMessage(String error);
     String getNextMessage();
     bool hasMessages();
+    int getMessageCount() const;
 
 private:
     String messageQueue[MAX_QUEUE_SIZE];

@@ -32,3 +32,7 @@ String MessageManager::getNextMessage() {
 bool MessageManager::hasMessages() {
     return queueIndex > 0;
 }
+
+int MessageManager::getMessageCount() const {
+    return queueIndex;
+}

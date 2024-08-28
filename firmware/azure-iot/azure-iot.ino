@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "AgentHelper.h"
 #include "Arduino_PMIC.h"
 #include "ArduinoLowPower.h"
 #include "BatteryManager.h"
@@ -18,15 +19,16 @@ BatteryManager batteryManager; // Create an instance of BatteryManager
 LEDManager builtinLed(LED_BUILTIN); // Create an instance of LEDManager
 TimerHelper timeHelper(rtc);
 MessageManager messageManager(timeHelper);
+AgentHelper agentHelper(100, 5); // 100 power levels, 5 messages max buffer
 
 #include "./iotc_dps.h" // this one is not really used, because the device is already provisioned via python script
 
 
 enum SystemState {
-    SENDING_TELEMETRY,
+    SLEEPING,
     COLLECTING_TELEMETRY,
-    SLEEPING_SHORT,
-    SLEEPING
+    SENDING_TELEMETRY,
+    SLEEPING_SHORT
 };
 
 // Working variables
@@ -130,14 +132,17 @@ void setup() {
 }
 
 SystemState make_decision() {
-    // if (collect_count < collect_threshold) {
-    //     collect_count++;
-    //     return COLLECTING_TELEMETRY;
-    // } else {
-    //     collect_count = 0; // Reset counter after sending telemetry
-    //     return SENDING_TELEMETRY;
-    // }
-    return SLEEPING;
+    int powerLevel = (int)batteryManager.readCharge();
+    int timeInterval = timeHelper.getHalfHourInterval();
+    int messageCount = messageManager.getMessageCount();
+
+    int state = agentHelper.encodeState(powerLevel, timeInterval, messageCount);
+    int action = agentHelper.getAction(state);
+
+    if (action == -1) {
+        return SLEEPING;
+    }
+    return static_cast<SystemState>(action);
 }
 
 void loop() {

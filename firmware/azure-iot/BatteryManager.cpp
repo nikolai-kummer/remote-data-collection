@@ -1,6 +1,6 @@
 #include "BatteryManager.h"
 
-BatteryManager::BatteryManager() : lastCharge(50.0) {
+BatteryManager::BatteryManager() : lastCharge(50.0), lastVoltage(0.0) {
     // Constructor
 }
 
@@ -23,7 +23,8 @@ void BatteryManager::end() {
 }
 
 float BatteryManager::readVoltage() {
-    return lipo.getVoltage();
+    lastVoltage = lipo.getVoltage(); // Store the voltage value
+    return lastVoltage;
 }
 
 float BatteryManager::readCharge() {
@@ -33,4 +34,8 @@ float BatteryManager::readCharge() {
 
 float BatteryManager::getLastCharge() const {
     return lastCharge;
+}
+
+float BatteryManager::getLastVoltage() const {
+    return lastVoltage;
 }

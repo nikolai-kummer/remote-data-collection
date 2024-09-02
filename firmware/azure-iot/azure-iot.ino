@@ -34,11 +34,13 @@ enum SystemState {
 };
 
 // Working variables
+bool debugFlag = false; // Set to true to enable debug mode which cycle through the states faster
+long MINIMUM_TELEMETRY_SEND_DURATION = 120000; // 2 minutes
+int SLEEP_DURATION_MINUTES = 30; // Sleep time in minutes
+int DEEP_SLEEP_STEP_DURATION_MILLIS = 60*1000; // DEEP SLEEP CYCLE DURATION
+
 SystemState currentState = SENDING_TELEMETRY; // Initial state
 int lastState = 0;
-// long MINIMUM_TELEMETRY_SEND_DURATION = 120000; // 2 minutes
-long MINIMUM_TELEMETRY_SEND_DURATION = 3000; // 2 minutes
-int SLEEP_DURATION_MINUTES = 1; //30; // Sleep time in minutes
 unsigned long startTime;
 
 String createMessagePayload() {
@@ -48,7 +50,7 @@ String createMessagePayload() {
     payload.acc_z = 0.0 / 10.0;
     payload.gps_lat =  0.0 / 10.0; // Example coordinates
     payload.bat = batteryManager.getLastCharge();
-    payload.volt = batteryManager.readVoltage();
+    payload.volt = batteryManager.getLastVoltage();
     payload.timestamp = timeHelper.getFormattedTime();
     payload.last_state = lastState;
     return payload.toString();
@@ -90,8 +92,11 @@ void readAndBufferPowerState() {
 
     if (sensorReady) {
         float charge = batteryManager.readCharge();
+        float voltage = batteryManager.readVoltage();
         Serial.print("Battery Charge: ");
         Serial.println(charge);
+        Serial.print("Battery Voltage: ");
+        Serial.println(voltage);
     } else {
         messageManager.addErrorMessage("[collectTelemetry] - Sensor not ready!");
         Serial.println(F("[collectTelemetry] - Sensor not ready!"));
@@ -152,6 +157,12 @@ void collectAndSendTelemetry() {
 
 
 void setup() {
+    if (debugFlag) {
+        // Accelerate the cycle for debugging
+        MINIMUM_TELEMETRY_SEND_DURATION = 3000; // 3 seconds
+        SLEEP_DURATION_MINUTES = 1; // 1 deep sleep cycle
+        DEEP_SLEEP_STEP_DURATION_MILLIS = 10*1000; // each sleep cycle should only be 10 seconds
+    }
     Serial.begin(115200);
     Serial.println("Start!");
 
@@ -224,7 +235,7 @@ void loop() {
 
     Serial.println(("Sleeping ..."));
     for (int i = 0; i < SLEEP_DURATION_MINUTES; i++) {
-        LowPower.deepSleep(30*1000);
+        LowPower.deepSleep(DEEP_SLEEP_STEP_DURATION_MILLIS);
         resetPMICWatchdog();
     }
     delay(50); // Small delay to prevent looping too quickly, adjust as necessary

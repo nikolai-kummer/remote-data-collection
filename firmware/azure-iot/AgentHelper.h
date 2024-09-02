@@ -6,13 +6,14 @@
 
 class AgentHelper {
 public:
-    AgentHelper(int n_time_intervals, int max_messages);
+    AgentHelper(int n_power_levels, int n_time_intervals, int max_messages);
 
     int encodeState(int power_level, int time, int message_count) const;
 
     int getAction(int state) const;
 
 private:
+    int N_POWER_LEVELS;
     int N_TIME_INTERVALS;
     int MAX_MESSAGES;
 

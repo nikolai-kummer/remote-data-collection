@@ -19,7 +19,7 @@ BatteryManager batteryManager; // Create an instance of BatteryManager
 LEDManager builtinLed(LED_BUILTIN); // Create an instance of LEDManager
 TimerHelper timeHelper(rtc);
 MessageManager messageManager(timeHelper);
-AgentHelper agentHelper(100, 5); // 100 power levels, 5 messages max buffer
+AgentHelper agentHelper(100,48, 5); // 100 power levels, 48 time divisions (every 30 mintues), 5 messages max buffer
 
 #include "./iotc_dps.h" // this one is not really used, because the device is already provisioned via python script
 
@@ -33,8 +33,9 @@ enum SystemState {
 
 // Working variables
 SystemState currentState = SENDING_TELEMETRY; // Initial state
-long MINIMUM_TELEMETRY_SEND_DURATION = 120000; // 10 seconds
-int SLEEP_DURATION_MINUTES = 30; // Sleep time in minutes
+// long MINIMUM_TELEMETRY_SEND_DURATION = 120000; // 2 minutes
+long MINIMUM_TELEMETRY_SEND_DURATION = 3000; // 2 minutes
+int SLEEP_DURATION_MINUTES = 1; //30; // Sleep time in minutes
 unsigned long startTime;
 
 String createMessagePayload() {
@@ -107,11 +108,31 @@ void collectAndSendTelemetry() {
     startTime = millis();  // Record the start time
     if (azureIoTManager.isConnected()) {
         Serial.println(F("Sending telemetry ..."));
-        int attempts = 0;
-        while (messageManager.hasMessages() && attempts < 25) {
+
+        unsigned long sendStartTime = millis();
+        unsigned long sendTimeout = 5000; // Timeout after 5 seconds
+        int maxAttempts = 25; // Limit the number of attempts to avoid infinite loop
+
+        for (int attempts = 0; attempts < maxAttempts; attempts++) {
+            if (!messageManager.hasMessages()) {
+                break; // Exit loop if no more messages to send
+            }
+
+            // Attempt to send the next message
             azureIoTManager.sendTelemetry(messageManager.getNextMessage());
-            delay(100); 
-            attempts++;
+
+            // Check for timeout
+            if (millis() - sendStartTime > sendTimeout) {
+                Serial.println(F("[sendTelemetry] - Timeout reached while sending telemetry."));
+                messageManager.addErrorMessage("[sendTelemetry] - Timeout reached while sending telemetry.");
+                break; // Exit loop if timeout is reached
+            }
+
+            delay(50); // Small delay to prevent rapid retries
+        }
+
+        if (messageManager.hasMessages()) {
+            messageManager.addErrorMessage("[sendTelemetry] - Not all messages were sent within the allowed attempts.");
         }
     } else {
         messageManager.addErrorMessage("[sendTelemetry] - Failed to connect to azureIoTManager!");
@@ -130,7 +151,7 @@ void setup() {
 
     setupPMIC();
 
-    // Print random state->action pairs for validation of model read
+    // Print random state->action pairs to validate that the model is decoded correctly
     int statesToTest[] = {0,1,2,15,16,258, 2000, 3000, 20000, 24740};
     int numStates = sizeof(statesToTest) / sizeof(statesToTest[0]);
 
@@ -146,12 +167,23 @@ void setup() {
 }
 
 SystemState make_decision() {
-    int powerLevel = (int)batteryManager.readCharge();
+    int powerLevel = (int)batteryManager.getLastCharge();
     int timeInterval = timeHelper.getHalfHourInterval();
     int messageCount = messageManager.getMessageCount();
 
+    Serial.print("Power Level: ");
+    Serial.print(powerLevel);
+    Serial.print(" | Time Interval: ");
+    Serial.print(timeInterval);
+    Serial.print(" | Message Count: ");
+    Serial.println(messageCount);
+
     int state = agentHelper.encodeState(powerLevel, timeInterval, messageCount);
     int action = agentHelper.getAction(state);
+    Serial.print("State: ");
+    Serial.print(state);
+    Serial.print(" -> Action: ");
+    Serial.println(action);
 
     if (action < 0 || action > 2) {
         return SENDING_TELEMETRY;
@@ -171,13 +203,15 @@ void loop() {
             break;
         case SLEEPING:
             currentState = COLLECTING_TELEMETRY;
+            break;
     }
     currentState = make_decision();
+    timeHelper.pause(100);
     switchTolowPower();
 
     Serial.println(("Sleeping ..."));
     for (int i = 0; i < SLEEP_DURATION_MINUTES; i++) {
-        LowPower.deepSleep(60*1000);
+        LowPower.deepSleep(30*1000);
         resetPMICWatchdog();
     }
     delay(50); // Small delay to prevent looping too quickly, adjust as necessary

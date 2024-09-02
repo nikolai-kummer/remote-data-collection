@@ -1,13 +1,14 @@
 #include "BatteryManager.h"
 
-BatteryManager::BatteryManager() {
-    // Constructor implementation if needed
+BatteryManager::BatteryManager() : lastCharge(50.0) {
+    // Constructor
 }
 
 bool BatteryManager::begin() {
     Wire.begin(); // Start I2C
     if (!lipo.begin()) {
         Serial.println(F("MAX17043 not detected. Please check wiring."));
+        lastCharge = 50.0; // Reset the charge value
         return false;
     }
     lipo.quickStart(); // Reset the MAX17043's algorithm
@@ -26,5 +27,10 @@ float BatteryManager::readVoltage() {
 }
 
 float BatteryManager::readCharge() {
-    return lipo.getSOC();
+    lastCharge = lipo.getSOC(); // Store the charge value
+    return lastCharge;
+}
+
+float BatteryManager::getLastCharge() const {
+    return lastCharge;
 }

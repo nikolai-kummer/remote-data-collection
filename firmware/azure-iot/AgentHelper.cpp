@@ -1,8 +1,8 @@
 #include "AgentHelper.h"
 #include "StateActionMap.h" // Include the generated header file with the packed state-action map
 
-AgentHelper::AgentHelper(int n_time_intervals, int max_messages)
-    : N_TIME_INTERVALS(n_time_intervals), MAX_MESSAGES(max_messages) {
+AgentHelper::AgentHelper(int n_power_levels, int n_time_intervals, int max_messages)
+    : N_POWER_LEVELS(n_power_levels), N_TIME_INTERVALS(n_time_intervals), MAX_MESSAGES(max_messages) {
     // No need to call initializeStateActionMap; it's implicitly used
 }
 

@@ -6,8 +6,8 @@ TimerHelper::TimerHelper(RTCZero& rtc) : _rtc(rtc) {
 }
 
 // Static method to pause execution for a given duration without blocking
-void TimerHelper::pause(unsigned long duration, unsigned long startTime) {
-    while (millis() - startTime < duration) {
+void TimerHelper::pause(unsigned long duration, unsigned long _startTime) {
+    while (millis() - _startTime < duration) {
         //wait
     }
 }
@@ -34,6 +34,7 @@ String TimerHelper::getFormattedTime() {
     if (seconds.length() == 1) seconds = "0" + seconds;
     if (day.length() == 1) day = "0" + day;
     if (month.length() == 1) month = "0" + month;
+    if (year.length() == 1) year = "0" + year;
 
     // Concatenate the strings to form the ISO 8601 format with zeroed microseconds
     String formattedTime = "20" + year + "-" + month + "-" + day + "T" + hours + ":" + minutes + ":" + seconds + ".000Z";

@@ -16,9 +16,11 @@ public:
     int getMessageCount() const;
 
 private:
-    String messageQueue[MAX_QUEUE_SIZE];
-    int queueIndex;
     TimerHelper& timeHelper;
+    String messageQueue[MAX_QUEUE_SIZE];
+    int head;  // Index of the first element in the queue
+    int tail;  // Index of the last element in the queue
+    int count; // Number of messages currently in the queue
 };
 
 #endif

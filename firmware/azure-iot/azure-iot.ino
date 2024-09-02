@@ -12,12 +12,14 @@
 
 #include "arduino_secrets.h"
 
+const int HOUR_OFFSET = -6; // Offset to convert UTC to local time
+
 RTCZero rtc; // real time clock
 WiFiManager wifiManager(SECRET_SSID, SECRET_PASS);
 AzureIoTManager azureIoTManager(SECRET_DEVICE_ID, SECRET_DEVICE_KEY, SECRET_BROKER, wifiManager);
 BatteryManager batteryManager; // Create an instance of BatteryManager
 LEDManager builtinLed(LED_BUILTIN); // Create an instance of LEDManager
-TimerHelper timeHelper(rtc);
+TimerHelper timeHelper(rtc, HOUR_OFFSET);
 MessageManager messageManager(timeHelper);
 AgentHelper agentHelper(100,48, 5); // 100 power levels, 48 time divisions (every 30 mintues), 5 messages max buffer
 

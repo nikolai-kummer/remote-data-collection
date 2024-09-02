@@ -1,7 +1,7 @@
 #include "TimerHelper.h"
 
 // Constructor
-TimerHelper::TimerHelper(RTCZero& rtc) : _rtc(rtc) {
+TimerHelper::TimerHelper(RTCZero& rtc, int hour_offset) : _rtc(rtc), HOUR_OFFSET(hour_offset) {
     //Constructor implementation if needed
 }
 
@@ -43,7 +43,10 @@ String TimerHelper::getFormattedTime() {
 }
 
 int TimerHelper::getHalfHourInterval() {
-    int hours = _rtc.getHours();    // Get the current hour (0-23)
+    int hours = _rtc.getHours() + HOUR_OFFSET;    // Get the current hour (0-23) and apply offset
+    if (hours < 0) {
+        hours += 24;
+    }
     int minutes = _rtc.getMinutes(); // Get the current minute (0-59)
     
     int halfHourInterval = (hours * 2) + (minutes / 30);

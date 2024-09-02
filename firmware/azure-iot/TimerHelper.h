@@ -6,7 +6,7 @@
 
 class TimerHelper {
 public:
-    TimerHelper(RTCZero& rtc);  // Constructor
+    TimerHelper(RTCZero& rtc, int hour_offset);  // Constructor
     static void pause(unsigned long duration, unsigned long startTime);
     static void pause(unsigned long duration);
     String getFormattedTime(); // Function to get formatted time string
@@ -14,6 +14,7 @@ public:
 
 private:
     RTCZero& _rtc;  // Reference to the RTCZero instance
+    int HOUR_OFFSET; // Offset to convert UTC to local time
 };
 
 #endif // _TIME_HELPER_H_

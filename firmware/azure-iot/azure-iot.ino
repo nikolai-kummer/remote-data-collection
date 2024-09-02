@@ -35,6 +35,7 @@ enum SystemState {
 
 // Working variables
 SystemState currentState = SENDING_TELEMETRY; // Initial state
+int lastState = 0;
 // long MINIMUM_TELEMETRY_SEND_DURATION = 120000; // 2 minutes
 long MINIMUM_TELEMETRY_SEND_DURATION = 3000; // 2 minutes
 int SLEEP_DURATION_MINUTES = 1; //30; // Sleep time in minutes
@@ -46,9 +47,10 @@ String createMessagePayload() {
     payload.acc_y = 0.0 / 10.0;
     payload.acc_z = 0.0 / 10.0;
     payload.gps_lat =  0.0 / 10.0; // Example coordinates
-    payload.bat = batteryManager.readCharge();
+    payload.bat = batteryManager.getLastCharge();
     payload.volt = batteryManager.readVoltage();
     payload.timestamp = timeHelper.getFormattedTime();
+    payload.last_state = lastState;
     return payload.toString();
 }
 
@@ -83,16 +85,22 @@ void switchTolowPower(){
     timeHelper.pause(50);
 }
 
-void collectTelemetry(){
+void readAndBufferPowerState() {
     bool sensorReady = batteryManager.begin();
+
     if (sensorReady) {
-        String payload = createMessagePayload();
-        messageManager.addMessage(payload);
-        Serial.println(payload);
+        float charge = batteryManager.readCharge();
+        Serial.print("Battery Charge: ");
+        Serial.println(charge);
     } else {
         messageManager.addErrorMessage("[collectTelemetry] - Sensor not ready!");
         Serial.println(F("[collectTelemetry] - Sensor not ready!"));
     }
+}
+
+void collectTelemetry(){
+    String payload = createMessagePayload();
+    messageManager.addMessage(payload);
 }
 
 void collectAndSendTelemetry() {
@@ -181,6 +189,7 @@ SystemState make_decision() {
     Serial.println(messageCount);
 
     int state = agentHelper.encodeState(powerLevel, timeInterval, messageCount);
+    lastState = state;
     int action = agentHelper.getAction(state);
     Serial.print("State: ");
     Serial.print(state);
@@ -195,6 +204,8 @@ SystemState make_decision() {
 
 void loop() {
     builtinLed.on();
+    readAndBufferPowerState(); // read and buffer power state
+
     switch (currentState) {
         case SENDING_TELEMETRY:
             collectAndSendTelemetry();

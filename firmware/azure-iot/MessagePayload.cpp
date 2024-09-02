@@ -8,6 +8,7 @@ MessagePayload::MessagePayload() {
     bat = 0.0;
     volt = 0.0;
     timestamp = "";
+    last_state = 0;
 }
 
 String MessagePayload::toString() {
@@ -19,6 +20,7 @@ String MessagePayload::toString() {
     payload += "\"gps_lat\": " + String(gps_lat,2) + ",";
     payload += "\"bat\": " + String(bat, 5) + ",";
     payload += "\"timestamp\": \"" + timestamp + "\",";
+    payload += "\"last_state\": " + String(last_state) + ",";
     payload += "\"volt\": " + String(volt, 4);
     payload += "}";
     return payload;

@@ -12,6 +12,7 @@ public:
     float bat;
     float volt;
     String timestamp;
+    int last_state;
 
     MessagePayload();
     String toString();

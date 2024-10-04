@@ -36,7 +36,7 @@ enum SystemState {
 };
 
 // Working variables
-bool debugFlag = true; // Set to true to enable debug mode which cycle through the states faster
+bool debugFlag = false; // Set to true to enable debug mode which cycle through the states faster
 long MINIMUM_TELEMETRY_SEND_DURATION = 120000; // 2 minutes
 int SLEEP_DURATION_MINUTES = 30; // Sleep time in minutes
 int DEEP_SLEEP_STEP_DURATION_MILLIS = 60*1000; // DEEP SLEEP CYCLE DURATION
@@ -117,7 +117,7 @@ void collectTelemetry(){
     // Initialize GPS
     bool gpsReady = gpsManager.begin();
     if (gpsReady) {
-        timeHelper.pause(5000);
+        timeHelper.pause(1000); // Pause for 1 second
         if (gpsManager.collectLocation()) {
             if (gpsManager.hasValidLocation()) {
                 Serial.print("Latitude: ");

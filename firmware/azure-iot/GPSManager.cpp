@@ -43,7 +43,7 @@ bool GPSManager::collectLocation() {
 
     // Wait for valid GPS data
     uint32_t collectLocationStartTime = millis();
-    const uint32_t timeout = 5000; // Wait up to 5 seconds
+    const uint32_t timeout = 60000; // Wait up to 5 seconds
 
     bool fixAcquired = false;
     while ((millis() - collectLocationStartTime) < timeout) {

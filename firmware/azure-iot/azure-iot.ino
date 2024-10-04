@@ -3,6 +3,7 @@
 #include "Arduino_PMIC.h"
 #include "ArduinoLowPower.h"
 #include "BatteryManager.h"
+#include "GPSManager.h"
 #include "LEDManager.h" 
 #include "MessagePayload.h"
 #include "TimerHelper.h"
@@ -22,6 +23,8 @@ LEDManager builtinLed(LED_BUILTIN); // Create an instance of LEDManager
 TimerHelper timeHelper(rtc, HOUR_OFFSET);
 MessageManager messageManager(timeHelper);
 AgentHelper agentHelper(100,48, 5); // 100 power levels, 48 time divisions (every 30 mintues), 5 messages max buffer
+uint8_t GPS_POWER_PIN = 7;
+GPSManager gpsManager(GPS_POWER_PIN);
 
 #include "./iotc_dps.h" // this one is not really used, because the device is already provisioned via python script
 
@@ -29,12 +32,11 @@ AgentHelper agentHelper(100,48, 5); // 100 power levels, 48 time divisions (ever
 enum SystemState {
     SLEEPING,
     COLLECTING_TELEMETRY,
-    SENDING_TELEMETRY,
-    SLEEPING_SHORT
+    SENDING_TELEMETRY
 };
 
 // Working variables
-bool debugFlag = false; // Set to true to enable debug mode which cycle through the states faster
+bool debugFlag = true; // Set to true to enable debug mode which cycle through the states faster
 long MINIMUM_TELEMETRY_SEND_DURATION = 120000; // 2 minutes
 int SLEEP_DURATION_MINUTES = 30; // Sleep time in minutes
 int DEEP_SLEEP_STEP_DURATION_MILLIS = 60*1000; // DEEP SLEEP CYCLE DURATION
@@ -53,6 +55,14 @@ String createMessagePayload() {
     payload.volt = batteryManager.getLastVoltage();
     payload.timestamp = timeHelper.getFormattedTime();
     payload.last_state = lastState;
+
+    // Set GPS data in payload
+    if (gpsManager.hasValidLocation()) {
+        payload.gps_lat = gpsManager.getLastLatitude() / 10000000.0; // Convert to decimal degrees
+        payload.gps_lon = gpsManager.getLastLongitude() / 10000000.0; // Convert to decimal degrees
+        payload.gps_alt = gpsManager.getLastAltitude() / 1000.0; // TODO: not sure about this conversion factor, but am leaving it in
+    }
+
     return payload.toString();
 }
 
@@ -104,6 +114,30 @@ void readAndBufferPowerState() {
 }
 
 void collectTelemetry(){
+    // Initialize GPS
+    bool gpsReady = gpsManager.begin();
+    if (gpsReady) {
+        timeHelper.pause(5000);
+        if (gpsManager.collectLocation()) {
+            if (gpsManager.hasValidLocation()) {
+                Serial.print("Latitude: ");
+                Serial.println(gpsManager.getLastLatitude() / 10000000.0, 7);
+                Serial.print("Longitude: ");
+                Serial.println(gpsManager.getLastLongitude() / 10000000.0, 7);
+            } else {
+                messageManager.addErrorMessage("[collectTelemetry] - Invalid GPS data collected!");
+                Serial.println(F("[collectTelemetry] - Invalid GPS data collected!"));
+            }
+        } else {
+            messageManager.addErrorMessage("[collectTelemetry] - Failed to collect GPS data!");
+            Serial.println(F("[collectTelemetry] - Failed to collect GPS data!"));
+        }
+        gpsManager.end(); // Shutdown GPS to save power
+    } else {
+        messageManager.addErrorMessage("[collectTelemetry] - GPS not ready!");
+        Serial.println(F("[collectTelemetry] - GPS not ready!"));
+    }
+
     String payload = createMessagePayload();
     messageManager.addMessage(payload);
 }
@@ -216,6 +250,7 @@ SystemState make_decision() {
 void loop() {
     builtinLed.on();
     readAndBufferPowerState(); // read and buffer power state
+    currentState = make_decision();
 
     switch (currentState) {
         case SENDING_TELEMETRY:
@@ -229,7 +264,6 @@ void loop() {
             currentState = COLLECTING_TELEMETRY;
             break;
     }
-    currentState = make_decision();
     timeHelper.pause(100);
     switchTolowPower();
 

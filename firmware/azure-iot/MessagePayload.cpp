@@ -9,6 +9,11 @@ MessagePayload::MessagePayload() {
     volt = 0.0;
     timestamp = "";
     last_state = 0;
+
+    // GPS data
+    gps_lat = 0.0;
+    gps_lon = 0.0;
+    gps_alt = 0.0;
 }
 
 String MessagePayload::toString() {
@@ -17,7 +22,14 @@ String MessagePayload::toString() {
     payload += "\"acc_x\": " + String(acc_x, 2) + ",";
     payload += "\"acc_y\": " + String(acc_y, 2) + ",";
     payload += "\"acc_z\": " + String(acc_z, 2) + ",";
-    payload += "\"gps_lat\": " + String(gps_lat,2) + ",";
+    
+    // GPS location field
+    payload += "\"location\": {";
+    payload += "\"lat\": " + String(gps_lat, 7) + ",";
+    payload += "\"lon\": " + String(gps_lon, 7) + ",";
+    payload += "\"alt\": " + String(gps_alt, 2);
+    payload += "},";
+    
     payload += "\"bat\": " + String(bat, 5) + ",";
     payload += "\"timestamp\": \"" + timestamp + "\",";
     payload += "\"last_state\": " + String(last_state) + ",";

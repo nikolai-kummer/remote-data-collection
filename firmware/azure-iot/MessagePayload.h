@@ -9,6 +9,8 @@ public:
     float acc_y;
     float acc_z;
     float gps_lat;
+    float gps_lon;
+    float gps_alt;
     float bat;
     float volt;
     String timestamp;

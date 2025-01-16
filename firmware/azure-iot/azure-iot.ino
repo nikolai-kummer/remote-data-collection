@@ -207,7 +207,7 @@ void setup() {
     setupPMIC();
 
     // Print random state->action pairs to validate that the model is decoded correctly
-    int statesToTest[] = {0,1,2,15,16,258, 2000, 3000, 20000, 24740};
+    int statesToTest[] = {0,1,2,15,16,258, 2000, 3000, 20000, 20001, 24740};
     int numStates = sizeof(statesToTest) / sizeof(statesToTest[0]);
 
     // Print the actions corresponding to the test states
@@ -272,5 +272,5 @@ void loop() {
         LowPower.deepSleep(DEEP_SLEEP_STEP_DURATION_MILLIS);
         resetPMICWatchdog();
     }
-    delay(50); // Small delay to prevent looping too quickly, adjust as necessary
+    delay(50); // Small delay to prevent looping too quickly
 }

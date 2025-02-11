@@ -1,1 +1,2 @@
-# remote-data-collection
+# remote data collection
+This repository contains the code for the an IoT project that uses reinformcent learning to collect data for an extended amount of time. The agent is deployed on an Arduino board and the data is sent to an IoT hub instance running on Azure. The agent is a Q-learning agent that learns to collect data from a sensor and send it to the cloud. The agent is rewarded for sending data to the cloud and penalized for not sending data to the cloud. The agent is considers the time of day and the battery state to decide whether to send data, collect data without sending, or do nothing. 

@@ -22,7 +22,7 @@
 */
 
 #include "thingProperties.h"
-#include <Arduino_MKRGPS.h>
+// #include <Arduino_MKRGPS.h>
 #include <Arduino.h>
 
 #define STEP_TIME_MS 1000 //Update to the next step
@@ -70,12 +70,12 @@ void setup()
 
   // If you are using the MKR GPS as shield, change the next line to pass
   // the GPS_MODE_SHIELD parameter to the GPS.begin(...)
-  if (!GPS.begin(GPS_MODE_SHIELD))
-  {
-    //Serial.println("Failed to initialize GPS!");
-    while (1)
-      ;
-  }
+  // if (!GPS.begin(GPS_MODE_SHIELD))
+  // {
+  //   //Serial.println("Failed to initialize GPS!");
+  //   while (1)
+  //     ;
+  // }
 
   // Connect to Arduino IoT Cloud
   ArduinoCloud.begin(ArduinoIoTPreferredConnection);
@@ -93,13 +93,13 @@ void loop()
     switch (actionIndex) {
       case 0:
         readBattery();
-        //Serial.print("Updating Battery Voltage: ");
-        //Serial.print(voltage);
-        //Serial.print("\n");
+        Serial.print("Updating Battery Voltage: ");
+        Serial.print(voltage);
+        Serial.print("\n");
 
-        //Serial.print("Updating Battery Charge: ");
-        //Serial.print(battery_charge);
-        //Serial.print("\n");
+        Serial.print("Updating Battery Charge: ");
+        Serial.print(battery_charge);
+        Serial.print("\n");
         break;
       case 1:
         readIMU();

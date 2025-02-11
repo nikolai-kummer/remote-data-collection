@@ -1,0 +1,128 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%    Canadian AI Latex Template    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[10pt]{cai}
+
+\begin{document}
+% Editorial staff will replace the following values:
+% 1. Conference Year
+% 2. Issue number
+% 3. Article DOI
+\def\conferenceyear{2025}
+\volumeheader{38}{0}%{00.000}
+\begin{center}
+
+\title{Development of a Reinforcement Learning Enabled Cattle Tracker Prototype}
+\maketitle
+
+\thispagestyle{empty}
+
+% Add Authors and Affiliations in the camera ready
+% for the double blind review, please leave this section as is 
+\begin{tabular}{cc}
+First Author\upstairs{\affilone,*}, Second Author\upstairs{\affilone}, Third Author\upstairs{\affilthree}
+\\[0.25ex]
+{\small \upstairs{\affilone} Affiliation One} \\
+{\small \upstairs{\affiltwo} Affiliation Two} \\
+{\small \upstairs{\affilthree} Affiliation Three} \\
+\end{tabular}
+  
+% Replace with corresponding author email address
+\emails{
+  \upstairs{*}corresponding\_author@example.ca 
+}
+\vspace*{0.2in}
+\end{center}
+
+\begin{abstract}
+This is just a sample \LaTeX template. As usual, most of the customization for the proceedings is done in the \texttt{cai.cls} file. 
+\end{abstract}
+
+% add your keywords
+\begin{keywords}{Keywords:}
+Provide up to six keywords, separated by commas.
+\end{keywords}
+\copyrightnotice
+
+\section{About CAIAC}
+
+The Canadian Artificial Intelligence Association / Association Pour L'Intelligence Artificielle au Canada started out of a workshop in the Spring of 1973 and was originally named as the Canadian Society for Computational Studies of Intelligence/Societé canadienne pour études d'intelligence par ordinateur (CSCSI/SCEIO) and is probably the oldest organized association of its kind. The first formal CSCSI/SCEIO conference happened in 1976. The conference was held biannually for several years until it became an yearly event in 2000. In 2008, CSCSI/SCEIO was officially renamed to CAIAC.
+
+More about our history can be found at \url{https://www.caiac.ca/en/history-of-caiac}. 
+
+\section{Submission Details}
+\label{submission}
+We invite submissions of both long and short papers. Long papers must be no longer than \textbf{12 pages}, and Short papers must be no longer than \textbf{6 pages}, including references, formatted using the conference template. 
+
+Papers submitted to the conference must contain original work that has not already been published, accepted for publication, or under review by a journal or another conference. Submissions will go through a \textbf{double-blind} review process. Authors are responsible for making sure submissions are anonymized.
+
+A ``Best Paper Award'' and a ``Best Student Paper Award'' will be given at the conference respectively to the authors of each best paper, as judged by the Best Paper Award Selection Committee.
+
+\section{Publication and Registration}
+\label{pub}
+Since 2020, the conference proceedings are published through PubPub open access\footnote{\url{https://www.pubpub.org/}} and indexed DBLP, ACM, Google Scholar, and other services that access Pubpub publications.
+
+At least one author of each accepted paper is required to attend the conference to present the work. The authors must agree to this requirement prior to submitting their paper for review.
+
+In addition, the corresponding author of each paper, acting on behalf of all of the authors of that paper, must complete and sign a Consent-to-Publish form. The corresponding author signing the copyright form should match the corresponding author marked on the paper.
+
+\section{Figures and Tables}
+
+This simple \LaTeX\xspace template has been tested with \texttt{latex} and with \texttt{pdflatex} commands, directly from the command line or through \texttt{latexmk}. We ask that you place captions below tables and figures as in the examples below.
+
+Pubpub uses a fairly complete \LaTeX\xspace engine that is likely to handle your source files without problems. Please check \url{https://help.pubpub.org/pub/latex-compatibility} if you require specialized packages or non-standard customization.
+
+\begin{figure}[ht]
+  \centering
+  \ifpdf
+    \includegraphics[scale=0.6]{figs/sample_fig.png}
+  \else
+    \includegraphics[scale=0.6,natwidth=330,natheight=120]{figs/sample_fig.png}
+  \fi
+  \caption{Captions under figures, please.}
+  \label{fig:sample_fig}
+\end{figure}
+
+\begin{table}[h]
+\begin{tabular}{|l|l|}
+\textbf{Header one} & \textbf{Header two} \\ 
+\hline
+ Some text & More text
+\end{tabular}
+\vspace{0.2cm}
+\caption{Captions under tables, please.}
+\label{tab:important}
+\end{table}
+
+\section{Using Overleaf}
+
+If you are reading this you have already downloaded the zip file with the template (\textbf{CANAI \conferenceyear\xspace LaTex Template.zip}). All you need to do is to upload it into Overleaf:
+
+\begin{enumerate}
+\item Go to \url{overleaf.com}.
+\item Click on new project (top left menu).
+\item Choose the \textbf{upload project} option.
+\item Upload the \textbf{zip file} to Overleaf.
+\end{enumerate}
+
+\section*{Acknowledgements}
+This section can be left blank during double-blind review. 
+
+
+%Appendixes go here
+\appendix
+
+\section{Example of math equation }
+%\label{appendix-customize-this-label}
+Binomial theorem: \cite{abramowitz1948handbook}
+\begin{equation}
+(x+y)^n=\sum_{\substack{k=0}}^{n}\dbinom{n}{k}x^{n-k}y^k
+\end{equation}
+
+
+% All references should be stored in the file "references.bib".
+% That call to use that file is in "cai.cls". 
+% Please do not modify anything below this line.
+\printbibliography[heading=subbibintoc]
+
+\end{document}

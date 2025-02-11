@@ -1,0 +1,17 @@
+# LaTeX intermediate files
+*.aux
+*.bbl
+*.blg
+*.blx.bib
+*-blx.bib
+*.brf
+*.fls
+*.fdb_latexmk
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.run.xml
+main.pdf
+
+/related

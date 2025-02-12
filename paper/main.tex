@@ -40,59 +40,85 @@ This is just a sample \LaTeX template. As usual, most of the customization for t
 
 % add your keywords
 \begin{keywords}{Keywords:}
-Provide up to six keywords, separated by commas.
+Internet of Things (IoT), reinforcement learning.
 \end{keywords}
 \copyrightnotice
 
-\section{About CAIAC}
+\section{Introduction}
 
-The Canadian Artificial Intelligence Association / Association Pour L'Intelligence Artificielle au Canada started out of a workshop in the Spring of 1973 and was originally named as the Canadian Society for Computational Studies of Intelligence/Societé canadienne pour études d'intelligence par ordinateur (CSCSI/SCEIO) and is probably the oldest organized association of its kind. The first formal CSCSI/SCEIO conference happened in 1976. The conference was held biannually for several years until it became an yearly event in 2000. In 2008, CSCSI/SCEIO was officially renamed to CAIAC.
+There is an estimated 1.5 million beef cows in Alberta with a portion of those being free-range cattle who are allowed to graze on large pastures for extended periods of time.
+Many farmers and researchers are interested in tracking movement of these cattle to asess the health of the herd, and to monitor the location of the cattle.
+These trackers take the form of collars, or ear tags and are equipped with sensors, batteries, and communication modules.
+The installation of the trackers is often a time consuming process so a tracker is expected to operate for extended periods of time (months) without human intervention.
+Given the size of the devices and the environment that they are expected to operate in, there is a limited amount of power budget available to the device and it beocmes a balancing act to ensure contiunuous operation, transmission and data collection.
+Reasearchers would like a device that transmits information at high rates as higher fidelity information allows them to make better conclusions about the state of the herd.
 
-More about our history can be found at \url{https://www.caiac.ca/en/history-of-caiac}. 
+The paradigm of Internet of Things (IoT) devices has emerged over the last two decade as a way to deploy compute and intelligence throughout the environment.
+% The number of IoT devices is expected to grow to 75 billion by 2025 \cite{gubbiInternetThingsIoT2013}.
+The devices are often small, low power, and have limited communication capabilities, but provide insights into the environment that they are deployed in.
+The cattle trackers are an example of an IoT device that is deployed in the environment to provide insights into the health and location of the herd.
+IoT devices combine sensors, communication modules, storage, and compute to provide insights into the environment that they are deployed in.
+IoT devices come as networks or individual devices and in the case of a cattle tracker, ideally a tracker would be self-sufficient as a stand-alone item.
+With the spread of the internet and Starlink-like services, it is possible to have a tracker that is connected to the internet and can send data to the cloud, which enables the farmer to monitor the herd from anywhere in the world.
+Again we have the challenge of limited power budget and the need to transmit data at high rates.
+The power budget can be extended with the use of solar power. 
+Solar power is susceptible to weather conditions and the amount of sunlight that is available to the device, which in the case of cattle trackers also depends on the location/orientation of the cattle.
 
-\section{Submission Details}
-\label{submission}
-We invite submissions of both long and short papers. Long papers must be no longer than \textbf{12 pages}, and Short papers must be no longer than \textbf{6 pages}, including references, formatted using the conference template. 
+Reinforcement learning is a branch of machine learning that is allows an agent to learn optimum actions to take in an environment to maximize a reward.
+The agent learns these actions by interacting with the environment and receiving feedback on the actions that it takes.
+Reinforcement learning has been used in a variety of applications such as playing games, optimizing energy consumption, and optimizing the operation of IoT devices.
+Machine learning deployed on IoT devices is somtimes referred to as TinyML or AIoT [Check this, since this is Copilot generated text].
+On one hand the addition of intelligence to the device allows it to make better decisions, but on the other hand the addition of intelligence to the device increases the power consumption of the device.
+Q-learning is a reinforcement learning algorithm that is used to optimize the actions that an agent takes in an environment and has been used in a variety of applications such as optimizing the operation of IoT devices.
 
-Papers submitted to the conference must contain original work that has not already been published, accepted for publication, or under review by a journal or another conference. Submissions will go through a \textbf{double-blind} review process. Authors are responsible for making sure submissions are anonymized.
+In this paper we propose a reinforcement learning enabled cattle tracker prototype that is able to optimize the energy consumption of the cattle tracker.
+The cattle tracker alternates between sleeping to conserve power and decision making. 
+It is faced with three decision points: 
 
-A ``Best Paper Award'' and a ``Best Student Paper Award'' will be given at the conference respectively to the authors of each best paper, as judged by the Best Paper Award Selection Committee.
+\begin{itemize}
+  \item when to transmit data (high power consumption)
+  \item when to collect and store data (medium power consumption)
+  \item when to do nothing instead (lowest power consumption)
+\end{itemize}
 
-\section{Publication and Registration}
-\label{pub}
-Since 2020, the conference proceedings are published through PubPub open access\footnote{\url{https://www.pubpub.org/}} and indexed DBLP, ACM, Google Scholar, and other services that access Pubpub publications.
+Data transmission is needed to check in and ensure that the device and the cattle is still operational, but consumes a large amount of power.
+Data collection and storage is needed to ensure uninterrupted data collection, and consumes a medium amount of power.
+Doing nothing consumes the least amount of power, but the device incurs gaps in the data collection, which should only be done to avoid draining the battery to an empty state.
+Doing nothing will get the device through the night/day to ensure that it doesn't end up in a weird state by discharging the battery completely.
 
-At least one author of each accepted paper is required to attend the conference to present the work. The authors must agree to this requirement prior to submitting their paper for review.
+\section{Related Work}
 
-In addition, the corresponding author of each paper, acting on behalf of all of the authors of that paper, must complete and sign a Consent-to-Publish form. The corresponding author signing the copyright form should match the corresponding author marked on the paper.
+IoT Sensors are organized as follows:
+\begin{itemize}
 
-\section{Figures and Tables}
+\item Edge devices are the sensors that collect data.
+\item Fog layer which include edge computing devices and IoT gateways.
+\item Cloud layer which includes the cloud servers.
+\end{itemize}
 
-This simple \LaTeX\xspace template has been tested with \texttt{latex} and with \texttt{pdflatex} commands, directly from the command line or through \texttt{latexmk}. We ask that you place captions below tables and figures as in the examples below.
+The challenges of IoT sensors are \cite{chenDeepReinforcementLearning2021}:
 
-Pubpub uses a fairly complete \LaTeX\xspace engine that is likely to handle your source files without problems. Please check \url{https://help.pubpub.org/pub/latex-compatibility} if you require specialized packages or non-standard customization.
+- limited battery life
 
-\begin{figure}[ht]
-  \centering
-  \ifpdf
-    \includegraphics[scale=0.6]{figs/sample_fig.png}
-  \else
-    \includegraphics[scale=0.6,natwidth=330,natheight=120]{figs/sample_fig.png}
-  \fi
-  \caption{Captions under figures, please.}
-  \label{fig:sample_fig}
-\end{figure}
+- limited processing power
 
-\begin{table}[h]
-\begin{tabular}{|l|l|}
-\textbf{Header one} & \textbf{Header two} \\ 
-\hline
- Some text & More text
-\end{tabular}
-\vspace{0.2cm}
-\caption{Captions under tables, please.}
-\label{tab:important}
-\end{table}
+- limited storage
+
+
+IoT Networks have been used in a variety of applications
+
+- In \cite{hribarUsingDeepQLearning2019} the authors use deep Q-learning to extend the life of generic sensors networks with non-rechargable batteries by monitoring and optimizing a network of sensors.
+
+- In \cite{yamsaniIoTBasedLivestockMonitoring2024} the authors use IoT networks to monitor the health of livestock across the physical, network, edge and cloud layers.
+
+Contrary to the above works, we propose a single sensor agent, that decides when to transmit, collect and store, or send data to the cloud. This is done by using reinforcement learning to optimize the energy consumption of the sensor.
+
+\section{System Design and Architecture}
+
+\section{Implementation}
+
+\section{Results}
+
 
 \section{Using Overleaf}
 
@@ -114,7 +140,7 @@ We would like to acknowledege the funding provided by NeurAlbertaTech for this p
 
 \section{Example of math equation }
 %\label{appendix-customize-this-label}
-Binomial theorem: \cite{abramowitz1948handbook}
+Binomial theorem: \cite{hribarUsingDeepQLearning2019}
 \begin{equation}
 (x+y)^n=\sum_{\substack{k=0}}^{n}\dbinom{n}{k}x^{n-k}y^k
 \end{equation}

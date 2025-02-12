@@ -119,21 +119,32 @@ Contrary to the above works, we propose a single sensor agent, that decides when
 
 \section{Results}
 
+The developed reinforcement learning-enabled cattle tracker prototype was successfully assembled and tested. The prototype consists of key components such as a solar panel, battery, communication module, and processing unit, as shown in Figure~\ref{fig:prototype}.
 
-\section{Using Overleaf}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.8\textwidth]{./figs/prototype.png}
+  \caption{Prototype of the reinforcement learning-enabled cattle tracker. The device consists of a solar panel for power harvesting, a rechargeable battery, and an embedded microcontroller for decision-making and communication.}
+  \label{fig:prototype}
+\end{figure}
 
-If you are reading this you have already downloaded the zip file with the template (\textbf{CANAI \conferenceyear\xspace LaTex Template.zip}). All you need to do is to upload it into Overleaf:
+The system was evaluated based on its power consumption, data transmission efficiency, and overall performance in real-world conditions. The reinforcement learning algorithm optimized the power usage by balancing data collection, storage, and transmission to ensure continuous operation.
 
-\begin{enumerate}
-\item Go to \url{overleaf.com}.
-\item Click on new project (top left menu).
-\item Choose the \textbf{upload project} option.
-\item Upload the \textbf{zip file} to Overleaf.
-\end{enumerate}
+Additionally, the power levels of the device over time were analyzed to assess energy efficiency. Figure~\ref{fig:power_levels} shows the variation in power consumption during different operational phases.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{./figs/power_levels.png}
+    \caption{Power consumption levels of the cattle tracker over time. Different colors represent different operational phases such as data transmission, storage, and idle states.}
+    \label{fig:power_levels}
+\end{figure}
+
+
+\section{Conclusion}
+
 
 \section*{Acknowledgements}
 We would like to acknowledege the funding provided by NeurAlbertaTech for this project.
-
 
 %Appendixes go here
 \appendix

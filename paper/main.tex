@@ -73,8 +73,12 @@ The TinyML paradigm is a subset of AIoT and focuses on machine learning on devic
 On one hand the addition of intelligence to the device allows it to make better decisions, but on the other hand the addition of intelligence to the device increases the power consumption of the device.
 Q-learning is a reinforcement learning algorithm that is used to optimize the actions that an agent takes in an environment and has been used in a variety of applications such as optimizing the operation of IoT devices.
 
-In this paper we present the development of a prototype for a cattle tracker that uses q-learning to optimize the power consumption of the device.
-The prototype is a stand-alone device that is powered by a solar panel and is able to make decisions on when to transmit data to the cloud, when to collect and store data, and when to do nothing.
+In this paper we present the development of a self-sufficient cattle tracker prototype capable of monitoring a single cow for extended periods of time.
+The tracker should record and collect data at regular intervals and transmit the data to the cloud with a maximum specified delay.
+Solar power can be utilized to extend the power budget of the device.
+Given that the device is capable of generating power, it should use excess power to transmit data more frequently, but the exact strategy is not trivial to determine.
+Reinforcement learning is used to optimize the power consumption of the device by making decisions on when to transmit data, when to collect and store data, and when to do nothing.
+
 The cattle tracker alternates between sleeping to conserve power and decision making. 
 It is faced with three decision points: 
 
@@ -108,8 +112,8 @@ The authors take advantage of corelation between sensor measurements to determin
 
 
 \section{System Design and Architecture}
-The design of a reinforcement learning enabled cattle tracker requires an iterative design process that includes assumptions and validations.
-Due to the iterateive nature, good pipelining processes are required to ensure that the design is validated at each step.
+
+The design of an AIoT device is an iterative process, that loops between simulations, hardware development and measure.
 First, a model was created with assumed power consumption and generation numbers to validate the agent.
 Next the prototype was constructed and the power consumption measured to update the model.
 The prototype was also used to collect and measure days for power generation under stationary conditions.
@@ -118,15 +122,42 @@ The agent was then deployed on the prototype and the power consumption was measu
 
 \subsection{Q-learning}
 
-In Q-learning an agent learns over many iteration how to choose an action $a$, given a state $s$, to maximize the reward $r$.
+Central to q-learning is the action-value function $Q(s,a)$, which is the expected return of taking action $a$ in state $s$.
+The agent learns the optimal policy by updating the action-value function based on the reward that it receives over many training iterations
 
 \begin{equation}
   Q(s,a) \leftarrow Q(s,a) + \alpha \left( r + \gamma \max_{a'} Q(s',a') - Q(s,a) \right)
 \end{equation}
 
+There are three main components to the q-learning algorithm: the state, the action, and the reward.
+
+The state for the agent is a combination of (i) the time of day (ii) the power level of the battery (iii) the number of messages stored in the device.
+The time of day is discretized into 30 minute intervals, which creates 48 possible values. 
+The power level is discretized into 20 levels. 
+The number of messages stored in the device is discretized into 5 levels.
+The action for the agent is one of three (i) transmit data (ii) collect and store data (iii) do nothing.
+
+\begin{equation}
+  \mathcal{A} = \left\{
+  \begin{array}{l}
+  a_1 = \text{``transmit data''}, \\
+  a_2 = \text{``collect and store data''}, \\
+  a_3 = \text{``do nothing''}
+  \end{array}
+  \right.
+  \end{equation}
+  
+
+The action-value $Q(a,s)$ function can take many forms. 
+For example there is deep Q-learning where the action-value function is approximated by a neural network.
+Due to the resource constraints, the action-value function is approximated by a table in this case.
+A table is an attractive option for inference only applications, as it is fast to access $O(1)$, requires little computation and only requires a sufficiently large memory.
+An additional benefit is that the table can be easily updated from the cloud as individual entries can be updated to reflect new conditions.
+
+
 \subsection{Hardware}
-The hardware prototype is shown in \ref{fig:prototype} and consists of a solar panel, battery, communication module, and processing unit.
-The specifications are shown in table \ref{tab:hardware_inventory}.
+The hardware prototype is shown in \ref{fig:prototype} and consists of an Arduino microcontroller, a GPS device,  a solar array, a power distribution system, and a battery.
+The detailed specifications are shown in table \ref{tab:hardware_inventory}.
 
 \begin{table}[h!]
   \centering
@@ -144,12 +175,30 @@ The specifications are shown in table \ref{tab:hardware_inventory}.
   \label{tab:hardware_inventory}
   \end{table}
 
+The prototype-level hardware experiences higher power consumption during sleeping, which results in shorter battery life. 
+A side-benefit of this larger power consumption is a faster feedback cycle for development and troubleshooting. 
+A custom-build PCB is planned for the production-level hardware to reduce power consumption during sleep and ensure robustness of the final device.
 
 \subsection{Firmware}
+The firmware for the device is written in C++ and is responsible for managing the power consumption of the device.
+The main loop runs at a 30 minute interval and the device alternates between sleeping and decision making.
+At each decision point the device reads the time, the power level of the battery, and the number of messages stored in the device and retrivees a recommended action.
+The device then takes the recommended action and updates the power level of the battery.
+
+The device is limited in its memory to store the policy.
+To pair down the table, the highest action for each state was selected.
+the policy was then stored as values that were bit-shifted to fit into a 32-bit integer.
 
 \subsection{Cloud}
+The device transmits data to Azure IoT Central.
+IoT Central is an attractive option as it allows the registering of the device for security purposes, the creation of dahsboards, and the creation of digital twins.
+The digital twin is a digital representation of the device and can be used to monitor the device and update the state of the device.
+The cloud enables two-way communication, which allows the device to receive updates and new policies from the cloud whenever it is connected.
+For example the cloud can update the device with a new policy for a new season, or a new policy for a new location that affects the solar gain.
 
 \section{Implementation}
+
+%TODO: Add sample power consumptions graphs
 
 \section{Results}
 

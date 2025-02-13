@@ -52,6 +52,7 @@ These trackers take the form of collars, or ear tags and are equipped with senso
 The installation of the trackers is often a time consuming process so a tracker is expected to operate for extended periods of time (months) without human intervention.
 Given the size of the devices and the environment that they are expected to operate in, there is a limited amount of power budget available to the device and it beocmes a balancing act to ensure contiunuous operation, transmission and data collection.
 Reasearchers would like a device that transmits information at high rates as higher fidelity information allows them to make better conclusions about the state of the herd.
+Sensors data that researchers are interested in includes GPS coordinates, accelerometer data snapshots, and temperature data.
 
 The paradigm of Internet of Things (IoT) devices has emerged over the last two decade as a way to deploy compute and intelligence throughout the environment.
 % The number of IoT devices is expected to grow to 75 billion by 2025 \cite{gubbiInternetThingsIoT2013}.
@@ -67,11 +68,13 @@ Solar power is susceptible to weather conditions and the amount of sunlight that
 Reinforcement learning is a branch of machine learning that is allows an agent to learn optimum actions to take in an environment to maximize a reward.
 The agent learns these actions by interacting with the environment and receiving feedback on the actions that it takes.
 Reinforcement learning has been used in a variety of applications such as playing games, optimizing energy consumption, and optimizing the operation of IoT devices.
-Machine learning deployed on IoT devices is somtimes referred to as TinyML or AIoT [Check this, since this is Copilot generated text].
+Machine learning deployed on IoT devices is somtimes referred to as Artificial intelligence of Things (AIoT)\cite{yamsaniIoTBasedLivestockMonitoring2024}, which includes a broad range of applications.
+The TinyML paradigm is a subset of AIoT and focuses on machine learning on devices with highly constrained resources, which often limits it to inference only\cite{rayReviewTinyMLStateoftheart2022}.
 On one hand the addition of intelligence to the device allows it to make better decisions, but on the other hand the addition of intelligence to the device increases the power consumption of the device.
 Q-learning is a reinforcement learning algorithm that is used to optimize the actions that an agent takes in an environment and has been used in a variety of applications such as optimizing the operation of IoT devices.
 
-In this paper we propose a reinforcement learning enabled cattle tracker prototype that is able to optimize the energy consumption of the cattle tracker.
+In this paper we present the development of a prototype for a cattle tracker that uses q-learning to optimize the power consumption of the device.
+The prototype is a stand-alone device that is powered by a solar panel and is able to make decisions on when to transmit data to the cloud, when to collect and store data, and when to do nothing.
 The cattle tracker alternates between sleeping to conserve power and decision making. 
 It is faced with three decision points: 
 
@@ -87,33 +90,64 @@ Doing nothing consumes the least amount of power, but the device incurs gaps in 
 Doing nothing will get the device through the night/day to ensure that it doesn't end up in a weird state by discharging the battery completely.
 
 \section{Related Work}
+% IoT and Cloud
+The main challenges of IoT sensors are \cite{chenDeepReinforcementLearning2021} are (i) limited battery life, (ii) limited processing power, and (iii) limited storage.
+IoT devices are often limited to inference only, as training a model on the device is computationally expensive.
+Luckily, the cloud can be used to train the model and the model can be deployed on the device.
 
-IoT Sensors are organized as follows:
-\begin{itemize}
+%Cattle
+Cattle tracking with IoT devices is a growing field of research. In \cite{yamsaniIoTBasedLivestockMonitoring2024} the authors propose a network of IoT devices to monitor cattle.
+The network consists of edge devices that are attached to the cattle, fog devices that are attached to the barn, and cloud devices that are attached to the cloud. 
+In \cite{duttaMOOnitorIoTBased2022} the authors present an IoT device that clasifies the behaviour of the cattle based on data from accelerometer, temperature via XGBoost and Random Forest classifiers.
+Their device lasts for an estimated 10 hours on a single charge.
 
-\item Edge devices are the sensors that collect data.
-\item Fog layer which include edge computing devices and IoT gateways.
-\item Cloud layer which includes the cloud servers.
-\end{itemize}
-
-The challenges of IoT sensors are \cite{chenDeepReinforcementLearning2021}:
-
-- limited battery life
-
-- limited processing power
-
-- limited storage
+% Reinforcement Learning
+In \cite{hribarUsingDeepQLearning2019} the authors use deep Q-learning to extend the life of generic sensors networks with non-rechargable batteries. 
+The authors take advantage of corelation between sensor measurements to determine the rate at which sensors should transmit to maximize battery life.
 
 
-IoT Networks have been used in a variety of applications
-
-- In \cite{hribarUsingDeepQLearning2019} the authors use deep Q-learning to extend the life of generic sensors networks with non-rechargable batteries by monitoring and optimizing a network of sensors.
-
-- In \cite{yamsaniIoTBasedLivestockMonitoring2024} the authors use IoT networks to monitor the health of livestock across the physical, network, edge and cloud layers.
-
-Contrary to the above works, we propose a single sensor agent, that decides when to transmit, collect and store, or send data to the cloud. This is done by using reinforcement learning to optimize the energy consumption of the sensor.
 
 \section{System Design and Architecture}
+The design of a reinforcement learning enabled cattle tracker requires an iterative design process that includes assumptions and validations.
+Due to the iterateive nature, good pipelining processes are required to ensure that the design is validated at each step.
+First, a model was created with assumed power consumption and generation numbers to validate the agent.
+Next the prototype was constructed and the power consumption measured to update the model.
+The prototype was also used to collect and measure days for power generation under stationary conditions.
+The agent was then updated with the new power consumption and trained with randomly sampled data from the model.
+The agent was then deployed on the prototype and the power consumption was measured to validate the agent.
+
+\subsection{Q-learning}
+
+In Q-learning an agent learns over many iteration how to choose an action $a$, given a state $s$, to maximize the reward $r$.
+
+\begin{equation}
+  Q(s,a) \leftarrow Q(s,a) + \alpha \left( r + \gamma \max_{a'} Q(s',a') - Q(s,a) \right)
+\end{equation}
+
+\subsection{Hardware}
+The hardware prototype is shown in \ref{fig:prototype} and consists of a solar panel, battery, communication module, and processing unit.
+The specifications are shown in table \ref{tab:hardware_inventory}.
+
+\begin{table}[h!]
+  \centering
+  \caption{Hardware Inventory}
+  \begin{tabular}{|l|l|l|l|}
+  \hline
+  \textbf{Hardware} & \textbf{Serial Number} & \textbf{Purpose} & \textbf{Specs} \\ \hline
+  Arduino MKR WiFi & SN12345 & Connectivity & WiFi-enabled microcontroller board \\ \hline
+  Arduino MKR GPS  & SN67890 & Location Tracking & Integrated GPS module \\ \hline
+  DFRobot Solar Power Manager & SN11223 & Power Regulation & Manages and distributes solar cell and battery \\ \hline
+  Solar Panel 70x100 mm & SN44556 & Energy Generation & 70x100 mm panel, 5W output \\ \hline
+  Sparkfun Fuel Gage & SN77889 & Fuel Level Monitoring & Analog sensor for fuel measurement \\ \hline
+  LiPo Battery & HXJNLDC & Energy Storage & 3.7V, 2000mAh capacity \\ \hline
+  \end{tabular}
+  \label{tab:hardware_inventory}
+  \end{table}
+
+
+\subsection{Firmware}
+
+\subsection{Cloud}
 
 \section{Implementation}
 

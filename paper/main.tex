@@ -57,49 +57,33 @@ Internet of Things (IoT), Reinforcement Learning, Cattle Monitoring.
 
 There is an estimated 1.5 million beef cows in Alberta with a portion of those being free-range cattle who are allowed to graze on large pastures for extended periods of time.
 Many farmers and researchers are interested in tracking movement of these cattle to asess the health of the herd, and to monitor the location of the cattle.
-Reasearchers are interested in behaviour of the herd like feeding, rumination, and resting and past research has shown that this behaviour can be correlated to sensor data from accelerometer \cite{unoldIoTBasedCowHealth2020}.
-Reasearchers would like a device that transmits information at high rates as higher fidelity information allows them to make better conclusions about the state of the herd.
+Reasearchers are interested feeding, rumination, and resting behaviour and past research has correlated it to sensor data from accelerometers \cite{unoldIoTBasedCowHealth2020}.
+Monitors benefit from tracking devices that transmits information at high rates as higher fidelity information allows them to make better conclusions about the state of the herd.
 These trackers take the form of collars, leg bands, or ear tags and are equipped with sensors, batteries, and communication modules.
 The installation of the trackers is a time consuming process so a tracker is expected to operate for extended periods of time (months) without human intervention.
-Given the size of the devices and the environment that they operate in, there is a limited power budget available to the device and it beocmes a balancing act to ensure contiunuous operation, transmission and data collection.
+Given the size of the devices and the environment that they operate in, there is a limited power budget to balance contiunuous operation, transmission, and data collection.
 
 The paradigm of Internet of Things (IoT) devices has emerged over the last two decades as a way to deploy sensors, communication modules, storage, compute, and intelligence throughout the environment.
-% The number of IoT devices is expected to grow to 75 billion by 2025 \cite{gubbiInternetThingsIoT2013}.
-The devices are often small, low power, and have limited communication capabilities, but provide insights into the environment that they are deployed in.
-Cattle trackers are an example of an IoT device that is deployed in the environment to provide insights into the health and location of the herd.
-These cattle trackers are strating to replace labour intensive manual observation with automated systems that can monitor the herd 24-7 \cite{unoldIoTBasedCowHealth2020} \cite{moutaouakilDigitalFarmingSurvey2023}.
+The devices are small, low power, and have limited communication capabilities, but provide insight into the environment that was previously not possible.
+These cattle trackers are IoT devices that replace labour intensive manual observation with automated systems that can monitor the herd 24-7 \cite{unoldIoTBasedCowHealth2020} \cite{moutaouakilDigitalFarmingSurvey2023}.
 IoT devices can operate as part of a network or as standalone units. 
 For cattle tracking, a self-sufficient device that connects to the internet via cellular networks such as GSM, LTE, or even satellite services like Starlink is ideal, allowing farmers to monitor their herds remotely. 
 However, these devices face power constraints due to the high data transmission rates required; solar panels can extend battery life, though their effectiveness depends on weather conditions and the cattle's orientation and location.
 
-Reinforcement learning is a branch of machine learning that allows an agent to learn optimum actions to take in an environment to maximize a reward.
-The agent learns these actions by interacting with the environment and receiving rewards for those actions.
+Reinforcement learning is a branch of machine learning that allows an agent to learn strategies to maximize a reward.
+The agent learns by interacting with the environment and receiving rewards for those actions.
 Reinforcement learning has been used in a variety of applications such as playing games, optimizing energy consumption, and optimizing the operation of IoT devices.
-The combination of reinforcement learning and IoT devices is an attractive option as it allows the device to make decisions without the need for human intervention.
-THe combvination of AI and IoT is sometimes called the Artificial intelligence of Things (AIoT)\cite{yamsaniIoTBasedLivestockMonitoring2024}, which includes a broad range of applications.
-The TinyML paradigm is a subset of AIoT and focuses on machine learning on devices with highly constrained resources, which often limits it to inference only\cite{rayReviewTinyMLStateoftheart2022}.
+The combination of reinforcement learning and IoT devices allows the device to make decisions without the need for human intervention.
+The combination of AI and IoT is called the Artificial intelligence of Things (AIoT)\cite{yamsaniIoTBasedLivestockMonitoring2024}, which includes a broad range of applications.
+The TinyML paradigm is a subset of AIoT and focuses on machine learning on devices with highly constrained resources and is often limited to inference only\cite{rayReviewTinyMLStateoftheart2022}.
 On one hand the addition of intelligence to the device allows it to make better decisions, but on the other hand the addition of intelligence to the device increases the power consumption of the device.
-Q-learning is a reinforcement learning algorithm that is used to optimize the actions that an agent takes in an environment and has been used in a variety of applications such as optimizing the operation of IoT devices.
 
 In this paper we present the development of a cattle tracker prototype capable of data collection for extended periods of time.
+The device is designed to alternate between data collection, data transmission, and sleeping to conserve power.
 It is not trivial to manually determine the optimal data collection strategy for the device under dynamic and complex conditions \cite{suttonReinforcementLearningIntroduction2020} so we propose the addition of reinforcement learning to automate the decision making process.
 The main contribution of this paper is the development of a reinforcement learning agent that optimizes the power consumption of the device by allowing the agent to make decisions on when to transmit data, when to collect and store data, and when to do nothing.
 The hardware prototype uses solar power to extend the power budget of the device and the agent is trained to take advantage of excess power availability to increase the data transmission rate.
 The IoT device likely fits other use cases, but the focus in this paper is on the cattle tracking application due to the requirements of collecting uninterrupted data, occasionally needing to check in, needing to operate for long periods of time, and the potential for a mobile solar panel, which results in drastically different power generation.
-
-The cattle tracker alternates between sleeping to conserve power and decision making. 
-It is faced with three decision points: 
-
-\begin{itemize}
-  \item when to transmit data (high power consumption)
-  \item when to collect and store data (medium power consumption)
-  \item when to do nothing instead (lowest power consumption)
-\end{itemize}
-
-Data transmission is needed to check in and ensure that the device and the cattle is still operational, but consumes a large amount of power.
-Data collection and storage is needed to ensure uninterrupted data collection, and consumes a medium amount of power.
-Doing nothing consumes the least amount of power, but the device incurs gaps in the data collection, which should only be done to avoid draining the battery to an empty state.
-Doing nothing will get the device through the night/day to ensure that it doesn't end up in a weird state by discharging the battery completely.
 
 \section{Related Work}
 % IoT and Cloud
@@ -107,27 +91,23 @@ The main challenges of IoT sensors are \cite{chenDeepReinforcementLearning2021} 
 Devices that fall under the TinyML paradigm are often limited to inference only, as training a model on the device is computationally expensive.
 The addition of cloud communication opens up the possibility of training the model in the cloud and deploying a new model to the device that adapts to changes in the environment.
 
-%Cattle
-Agriculture and cattle tracking commonly employ IoT devices for monitoring. 
-In \cite{yamsaniIoTBasedLivestockMonitoring2024} the authors propose a network of IoT devices to monitor cattle, with edge devices for network communication and cloud services for data storage and analysis.
-Multiple standalone devices have also been developed for cattle tracking, with many focusing on the sensor output of the device.
-In \cite{duttaMOOnitorIoTBased2022} the authors present an IoT device that clasifies the behaviour of the cattle based on data from accelerometer, temperature via XGBoost and Random Forest classifiers.
-Their device lasts for an estimated 10 hours on a single charge.
-In \cite{unoldIoTBasedCowHealth2020} the authors present the CowMonitor an IoT device uses Bluetooth Low Energy (BLE) for communication with a hub and sends accelerometer and magnetometer data to the cloud.
-They transmit data without acknowledgement for oppurtunistic capture and lasts 5 years without battery replacement, but required the deployment of BLE hubs and WiFi ground stations thoughout the pasture.
+%Cattle and IoT
+Existing IoT-based cattle monitoring solutions have primarily focused on health tracking, behavior classification, and disease detection using machine learning and sensor networks. 
+Studies such as \cite{duttaMOOnitorIoTBased2022} have proposed multi-sensory IoT devices for cattle activity monitoring using XGBoost and Random Forest classifiers. 
+\cite{yamsaniIoTBasedLivestockMonitoring2024} introduced an ML-based livestock management system that classifies cattle behavior but does not optimize energy consumption. 
+Additionally, \cite{arshadFederatedLearningModel2024} and \cite{iRealTimeCattle2024} have applied LoRa-based IoT solutions and federated learning for disease detection, emphasizing data accuracy over power efficiency.
 
 % Reinforcement Learning
-The combination of intelligence and IoT devices allows a powerful solution to add intelligence to the edge.
-In \cite{hribarUsingDeepQLearning2019} the authors use deep Q-learning to extend the life of generic sensors networks with non-rechargable batteries. 
-The authors take advantage of corelation between sensor measurements to determine the rate at which sensors should transmit to maximize battery life.
-
+In contrast, our work integrates reinforcement learning to dynamically optimize power consumption in cattle trackers, ensuring long-term device operation while maintaining data quality. 
+Prior studies, such as \cite{hribarUsingDeepQLearning2019}, demonstrated that deep Q-learning could extend IoT device battery life, but they did not apply this approach to livestock monitoring. 
+Our system leverages RL-driven decision-making to balance data transmission, storage, and power conservation, addressing a key limitation in prior research and enhancing the sustainability of IoT-based livestock tracking solutions.
 
 
 \section{System Design and Architecture}
 
-The design of an AIoT device is an iterative process, that loops between simulations, hardware development, measurement and redeployment.
+The design of an AIoT device is an iterative process, that contiunuously cycles between simulations, hardware development, measurement and redeployment.
 It is critical to have an automated process in place that can be updated without manual intervention.
-The use of reinforcement learning greatly simplifies the process and allows the device to adapt to new conditions without a manual update of collection strategies.
+The use of reinforcement learning greatly simplifies the process and allows the device to adapt to new conditions without the need for manual update of collection strategies.
 
 \subsection{Q-learning}
 
@@ -141,44 +121,54 @@ where $\alpha$ is the learning rate, $r$ is the reward, $\gamma$ is the discount
 
 The state of the agent is a combination of the time of day $t$, the power level of the battery $p$, and the number of messages queued on the device $m$.
 The time of day informs the agent of the likelyhood of power generation and was discretized to 48 bins.
-The maximum power state was discretized into 100 power levels and the maximum number of messages was 5, forcing the agent to check in every 2.5 hours or otherwise risk losing messages.
+The maximum power state was discretized into 100 power levels and the maximum number of messages was 5, forcing the agent to check transmit every 2.5 hours or risk losing data.
 This resulted in 24,800 possible states for the agent to be in.
 
-The agent can choose one of three actions (i) transmit data (ii) collect and store data (iii) do nothing.
+The agent can choose one of three actions (i) do nothing (ii) collect and store data (iii) collect and transmit data.
 
 \begin{equation}
   \mathcal{A} = \left\{
   \begin{array}{l}
-    a_0 = \text{``do nothing''}
-    a_1 = \text{``collect and store data''}, \\
-    a_2 = \text{``collect and transmit data''}, \\
+    a_0 = 0, \text{``do nothing''}
+    a_1 = 1, \text{``collect and store data''}, \\
+    a_2 = 2, \text{``collect and transmit data''}, \\
   \end{array}
   \right.
   \end{equation}
-Turning the action-value function into a $4800 \times 3$ table.
+Turning the action-value function into a $24800 \times 3$ table.
   
 A tabular representation of the action-value function $Q(a,s)$ was used as it turns the model inference into a table lookup with $O(1)$ complexity.
 Alternatives to the tabular representation include deep Q-learning, which uses a neural network to approximate the action-value function, and is more computationally expensive.
 A tabular representation only requires a sufficiently large memory to store the table.
 An additional benefit is that the table can be easily updated from the cloud as individual entries can be updated to reflect new conditions.
 
-The goal of the agent is to maximize the number of messages sent to the cloud, while minimizing the power consumption of the device.
-It is not trivial to determine the reward values for the agent to maximize data collection.
-We consider the reward values to be hyperparameters that can be tuned to maximize the data collection and used a Bayesian optimization framework from the the python \verb|scikit-optimize| package to automatically tune the hyperparameters.
-The hyper parameters could be nagative and they were:
-\begin{itemize}
-  \item reward\_power\_loss: the reward for losing power
-  \item reward\_power\_multiplier: the reward for having excess power at every time step
-  \item reward\_action\_0: the reward for doing nothing
-  \item reward\_action\_1: the reward for collecting and storing data
-  \item reward\_action\_2: the reward for collecting and transmitting data
-  \item reward\_message\_count: the reward for the number of messages sent when transmission occurred
-\end{itemize}
+The goal of the agent is to maximize the number of messages sent to the cloud, while maximizing the power level of the device.
+It is not trivial to determine the reward values that maximize data collection.
+We consider the reward values to be hyperparameters that can be tuned to maximize the number of messages send and used a Bayesian optimization framework from the the python \verb|scikit-optimize| package to automatically tune the hyperparameters.
+The hyper parameters could be nagative and their values are shown in Table~\ref{tab:reward_parameters}.
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{l p{8cm} c}
+      \toprule
+      \textbf{Parameter} & \textbf{Description} & \textbf{Value} \\
+      \midrule
+      reward\_power\_loss & reward for losing power & 0.00  \\ 
+      reward\_power\_multiplier & reward per power level at every time step & 0.0001  \\ 
+      reward\_action\_0 & reward for doing nothing & -1.716 \\ 
+      reward\_action\_1 & reward for collecting and storing data & -0.600 \\ 
+      reward\_action\_2 & reward for collecting and transmitting data & -1.485 \\ 
+      reward\_message\_count & reward for each message at transmission & 0.841 \\ 
+      \bottomrule
+  \end{tabular}
+  \caption{Reward function parameters, their descriptions, and values extracted during hyperparameter tuning.}
+  \label{tab:reward_parameters}
+\end{table}
 
 The agent was trained on a simulated environment with the power consumption and generation numbers from the prototype.
 At every step, the environment would update the power level of the battery, the time of day, and the number of messages queued on the device depending on the action taken by the agent.
-The actual measured battery capacity was 1300 mAh and every 30 minutes the device would consume 5.0 mAh in sleeping.
-A power transmission would consume an additional 1.6 mAh and a data collection would consume an additional 0.1 mAh.
+The actual measured battery capacity was 1300 mAh (discretized into 100 power levels) and every 30 minutes the device would consume 5.0 mAh while sleeping.
+A message transmission action would consume an additional 1.6 mAh and a data collection action would consume an additional 0.1 mAh.
 
 Sample solar gain data from 17 days in June in Edmonton was turned into an average sunny day and an average cloudy day. 
 The environment would switch between the two days to simulate the weather conditions with an 80\% chance of a cloudy day.
@@ -189,7 +179,7 @@ Once an optimum set of hyperparameters was found, the action-value function was 
 This automated approach was less labour intensive than manual tuning and has shown to be effective in optimizing the reward values.
 
 \subsection{Hardware}
-The hardware prototype is shown in \ref{fig:prototype} and consists of an Arduino microcontroller, a GPS device,  a solar array, a power distribution system, and a battery.
+The hardware prototype is shown in \ref{fig:prototype} and consists of an Arduino microcontroller, a GPS device, a solar array, a power distribution system, and a battery.
 The detailed specifications are shown in table \ref{tab:hardware_inventory}.
 
 \begin{table}[h!]
@@ -212,13 +202,6 @@ Testing on prototype-level hardware showed a high power consumption of 9.9 mA du
 A custom-build PCB with isolation of every component should experience a sleep current on the order of $\mu A$ and is planned for the the next iteration hardware to reduce power consumption during sleep.
 An unexpected side-benefit of a prototype with large power consumption is a fast development feedback cycle where the prototype drains the battery in days, rather than weeks. 
 
-% \begin{figure}[htbp]
-%   \centering
-%   \includegraphics[width=0.5\textwidth]{./figs/prototype.png}
-%   \caption{Prototype of the reinforcement learning-enabled cattle tracker. The device consists of a solar panel for power harvesting, a rechargeable battery, and an embedded microcontroller for decision-making and communication.}
-%   \label{fig:prototype_real}
-% \end{figure}
-
 \begin{figure}[h]
   \centering
   \begin{subfigure}{0.48\textwidth}
@@ -239,7 +222,7 @@ An unexpected side-benefit of a prototype with large power consumption is a fast
 \end{figure}
 
 \subsection{Firmware}
-The firmware for the prototype is written in C++ and is responsible for managing the power consumption of the device.
+The firmware for the prototype was Arduino C++ code and is responsible for collecting sensor data, making decisions, and transmitting data to the cloud (see Figure~\ref{fig:prototype_diagram}).
 The main loop runs at a 30 minute interval and the device alternates between sleeping and decision making.
 At each decision point the device reads the time, the power level of the battery, and the number of messages stored in the device and retrivees a recommended action.
 The device then takes the recommended action and updates the power level of the battery.
@@ -249,7 +232,7 @@ To pair down the table, only the highest action for each state was selected.
 The policy was then stored as values that were bit-shifted to fit into a 32-bit integer.
 
 \subsection{Cloud}
-The device transmits data to Azure IoT Central.
+The prototype transmits data to Azure IoT Hub, which interfaces with Azure IoT Central for dashboarding, and Blob storage for data retention.
 IoT Central is an attractive option as it allows the registering of the device for security purposes, the creation of dahsboards, and the creation of digital twins.
 The digital twin is a digital representation of the device and can be used to monitor the device and update the state of the device.
 The cloud enables two-way communication, which allows the device to receive updates and new policies from the cloud whenever it is connected.
@@ -260,9 +243,10 @@ For example the cloud can update the device with a new policy for a new season, 
 The developed reinforcement learning-enabled cattle tracker prototype was successfully assembled and tested. 
 The prototype consists of key components such as a solar panel, battery, communication module, and processing unit, as shown in Figure~\ref{fig:prototype}.
 
-\subsection{Training Results}
-A baseline device that alternates between collection and transmission is used to compare the performance of the reinforcement learning agent.
-The results are shown in Table~\ref{tab:agent_comparison}.
+\subsection{Simulation Training Results}
+A baseline collection strategy that alternates between collection and transmission is used to compare the performance of the reinforcement learning agent.
+The baseline is set up to send data once per hour.
+The results comparing the trained agent and the baseline are shown in Table~\ref{tab:agent_comparison}.
 
 \begin{table}[h]
   \centering

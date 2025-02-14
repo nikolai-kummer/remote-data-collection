@@ -2,7 +2,7 @@
 %    Canadian AI Latex Template    %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \documentclass[10pt]{cai}
-
+\captionsetup{font=small}
 \begin{document}
 % Editorial staff will replace the following values:
 % 1. Conference Year
@@ -263,10 +263,36 @@ The results are shown in Table~\ref{tab:agent_comparison}.
 \end{table}
 
 The reinforcement learning agent outperforms the baseline agent by increasing the number of messages sent to the cloud by 4.3\% while maintaining a higher average power level by avoiding excess transmission actions.
+The trained agent performed on average 2.12 collection actions for every transmission action, compared to a 1:1 ratio for the baseline agent.
 
-\subsection{Deploymnet Results}
+\subsection{Deployment Results}
 
+The trained agent was deployed and evaluated on the prototype hardware in an indoor environment over a 9 day period with occasional manual charging to ensure continuous operation.
+This test evaluated the long-term performance of the agent and hardware system and the results are shown in Figure~\ref{fig:prototype_result}.
+The hardware did experience 
 
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+      \centering
+      \includegraphics[width=\linewidth]{figs/prototype_power_level.png}
+      \caption{Prototype power level over a 9 day collection window}
+      \label{fig:prototype_power}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+      \centering
+      \includegraphics[width=\linewidth]{figs/battery_level_vs_collection_ratio.png}
+      \caption{Learned agent strategies as a function of power levels}
+      \label{fig:battery_vs_collection}
+  \end{subfigure}
+  \caption{Collected data from the prototype hardware highlighting a nonlinear power level discharge and the learned agent strategies.}
+  \label{fig:prototype_result}
+\end{figure}
+
+Figure~\ref{fig:prototype_power} highlights the nonlinear discharge curve of the battery over the 9 day period. 
+The discharge rate during sleeping is relatively constant and the nonlinearity is a result of the mapping function of voltage to remaining capacity.
+This nonlinearity poses a challenge to the agent, since it increases the error in future reward and remaining capacity estimation at lower power levels.
 
 
 
@@ -275,12 +301,7 @@ The reinforcement learning algorithm optimized the power usage by balancing data
 
 Additionally, the power levels of the device over time were analyzed to assess energy efficiency. Figure~\ref{fig:power_levels} shows the variation in power consumption during different operational phases.
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.8\textwidth]{./figs/power_levels.png}
-    \caption{Power consumption levels of the cattle tracker over time. Different colors represent different operational phases such as data transmission, storage, and idle states.}
-    \label{fig:power_levels}
-\end{figure}
+
 
 \section{Conclusion}
 In this study, we developed a reinforcement learning-enabled cattle tracker prototype designed to optimize power consumption while ensuring efficient data transmission and collection. The device successfully leverages reinforcement learning to dynamically adjust its operation based on available energy, enhancing battery life and operational efficiency. By incorporating solar power and an intelligent decision-making framework, the prototype demonstrates a feasible approach to long-term, autonomous cattle tracking.

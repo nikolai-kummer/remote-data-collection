@@ -126,21 +126,20 @@ The agent was then deployed on the prototype and the power consumption was measu
 
 \subsection{Q-learning}
 
-Central to q-learning is the action-value function $Q(s,a)$, which is the expected return of taking action $a$ in state $s$.
-The agent learns the optimal policy by updating the action-value function based on the reward that it receives over many training iterations
+Central to q-learning is the action-value function $Q(s,a)$, which is the expected cumulative reward of taking action $a$ in state $s$.
+The agent learns the optimal policy by updating the action-value function based on the reward that it receives over many training iterations according to:
 
 \begin{equation}
   Q(s,a) \leftarrow Q(s,a) + \alpha \left( r + \gamma \max_{a'} Q(s',a') - Q(s,a) \right)
 \end{equation}
+where $\alpha$ is the learning rate, $r$ is the reward, $\gamma$ is the discount factor, and $s'$ is the next state after taking action $a$ in state $s$.
 
-There are three main components to the q-learning algorithm: the state, the action, and the reward.
+The state of the agent is a combination of the time of day $t$, the power level of the battery $p$, and the number of messages queued on the device $m$.
+The time of day informs the agent of the likelyhood of power generation and was discretized to 48 bins.
+The maximum power state was discretized into 100 power levels and the maximum number of messages was 5, forcing the agent to check in every 2.5 hours or otherwise risk losing messages.
+This resulted in 24,800 possible states for the agent to be in.
 
-The state for the agent is a combination of (i) the time of day (ii) the power level of the battery (iii) the number of messages stored in the device.
-The time of day is discretized into 30 minute intervals, which creates 48 possible values. 
-The power level is discretized into 20 levels. 
-The number of messages stored in the device is discretized into 5 levels.
-The action for the agent is one of three (i) transmit data (ii) collect and store data (iii) do nothing.
-
+The agent can choose one of three actions (i) transmit data (ii) collect and store data (iii) do nothing.
 
 \begin{equation}
   \mathcal{A} = \left\{
@@ -151,21 +150,28 @@ The action for the agent is one of three (i) transmit data (ii) collect and stor
   \end{array}
   \right.
   \end{equation}
+Turning the action-value function into a $4800 \times 3$ table.
   
-
-The action-value $Q(a,s)$ function can take many forms. 
-For example there is deep Q-learning where the action-value function is approximated by a neural network.
-Due to the resource constraints, the action-value function is approximated by a table in this case.
-A table is an attractive option for inference only applications, as it is fast to access $O(1)$, requires little computation and only requires a sufficiently large memory.
+A tabular representation of the action-value function $Q(a,s)$ was used as it turns the model inference into a table lookup with $O(1)$ complexity.
+Alternatives to the tabular representation include deep Q-learning, which uses a neural network to approximate the action-value function, and is more computationally expensive.
+A tabular representation only requires a sufficiently large memory to store the table.
 An additional benefit is that the table can be easily updated from the cloud as individual entries can be updated to reflect new conditions.
 
+The goal of the agent was to maximize the number of messages sent to the cloud, while minimizing the power consumption of the device.
+It is not trivial to determine the reward values for the agent to maximize data collection.
+We consider the reward values to be hyperparameters that can be tuned to maximize the data collection and used a Bayesian optimization framework from the the python \verb|scikit-optimize| package to automatically tune the hyperparameters.
+The hyper parameters could be nagative and they were:
+\begin{itemize}
+  \item reward\_power\_loss: the reward for losing power
+  \item reward\_power\_multiplier: the reward for having excess power at every time step
+  \item reward\_action\_0: the reward for transmitting data
+  \item reward\_action\_1: the reward for collecting and storing data
+  \item reward\_action\_2: the reward for doing nothing
+  \item reward\_message\_count: the reward for the number of messages sent when transmission occurred
+\end{itemize}
 
-It is not trivial to determine the reward values for the agent to mximize data collection.
-Manual heuristics can be used to determine the reward values, but that is not efficient and may not be optimal.
-For the agent we consider the reward values to be hyperparameters that can be tuned to maximize the data collection.
-We use a Bayesian optimization framework—specifically, the Gaussian Process-based minimization function \verb|gp\_minimize| from the \verb|scikit-optimize| library to automatically search the hyperparameter space defined for each reward component (e.g., reward\_power\_loss, reward\_power\_multiplier, reward\_action\_0, reward\_action\_1, reward\_action\_2, and reward\_message\_count).
-By repeatedly running training sessions with slightly varied random seeds and averaging the performance metrics, our objective function (which returns the negative median sent messages) guides the search toward the parameter set that maximizes data collection
-This automated approach saves time compared to manual tuning efforts and has shown to be effective in optimizing the reward values.
+We ran repeated training sessions over solar gain data collected from the physical prototype that guided us toward the parameter set that maximizes data collection.
+This automated approach was less labour intensive than manual tuning and has shown to be effective in optimizing the reward values.
 
 \subsection{Hardware}
 The hardware prototype is shown in \ref{fig:prototype} and consists of an Arduino microcontroller, a GPS device,  a solar array, a power distribution system, and a battery.
@@ -182,7 +188,7 @@ The detailed specifications are shown in table \ref{tab:hardware_inventory}.
   DFRobot Solar Power Manager & SN11223 & Power Regulation & Manages and distributes solar cell and battery \\ \hline
   Solar Panel 70x100 mm & SN44556 & Energy Generation & 70x100 mm panel, 5W output \\ \hline
   Sparkfun Fuel Gage & SN77889 & Fuel Level Monitoring & Analog sensor for fuel measurement \\ \hline
-  LiPo Battery & HXJNLDC & Energy Storage & 3.7V, 2000mAh capacity \\ \hline
+  LiPo Battery & HXJNLDC & Energy Storage & 3.7V, 2100mAh capacity \\ \hline
   \end{tabular}
   \label{tab:hardware_inventory}
   \end{table}

@@ -212,9 +212,28 @@ Testing on prototype-level hardware showed a high power consumption of 9.9 mA du
 A custom-build PCB with isolation of every component should experience a sleep current on the order of $\mu A$ and is planned for the the next iteration hardware to reduce power consumption during sleep.
 An unexpected side-benefit of a prototype with large power consumption is a fast development feedback cycle where the prototype drains the battery in days, rather than weeks. 
 
-\begin{figure}[htbp]
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=0.5\textwidth]{./figs/prototype.png}
+%   \caption{Prototype of the reinforcement learning-enabled cattle tracker. The device consists of a solar panel for power harvesting, a rechargeable battery, and an embedded microcontroller for decision-making and communication.}
+%   \label{fig:prototype_real}
+% \end{figure}
+
+\begin{figure}[h]
   \centering
-  \includegraphics[width=0.5\textwidth]{./figs/prototype.png}
+  \begin{subfigure}{0.48\textwidth}
+      \centering
+      \includegraphics[width=0.75\linewidth]{./figs/prototype.png}
+      \caption{Prototype power level over a 9 day collection window}
+      \label{fig:prototype_real}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+      \centering
+      \includegraphics[width=\linewidth]{figs/prototype_diagram.png}
+      \caption{Overall architecture of the reinforcement learning-enabled cattle tracker}
+      \label{fig:prototype_diagram}
+  \end{subfigure}
   \caption{Prototype of the reinforcement learning-enabled cattle tracker. The device consists of a solar panel for power harvesting, a rechargeable battery, and an embedded microcontroller for decision-making and communication.}
   \label{fig:prototype}
 \end{figure}

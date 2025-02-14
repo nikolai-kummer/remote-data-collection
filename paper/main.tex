@@ -35,9 +35,15 @@ First Author\upstairs{\affilone,*}, Second Author\upstairs{\affilone}, Third Aut
 \end{center}
 
 \begin{abstract}
-The increasing demand for precision livestock monitoring has led to the development of Internet of Things (IoT)-enabled solutions for real-time tracking and health assessment of cattle. In this study, we present the development of a reinforcement learning-enabled cattle tracker prototype designed to optimize power consumption while ensuring continuous data collection and transmission. The prototype integrates IoT sensors, solar power harvesting, and reinforcement learning-based decision-making to dynamically balance data transmission, storage, and energy conservation. 
-The reinforcement learning agent autonomously determines the optimal transmission schedule based on power availability, maximizing data efficiency while prolonging battery life. Experimental evaluations demonstrate the prototype's capability to sustain long-term operation under real-world environmental constraints. The results highlight the feasibility of integrating machine learning with IoT devices for adaptive, energy-efficient cattle monitoring.
-Our findings contribute to the broader field of smart agriculture by demonstrating how reinforcement learning can be leveraged to enhance IoT-based livestock management. Future work will focus on optimizing the decision-making model for diverse environmental conditions and scaling the system for larger deployments.
+The increasing demand for precision livestock monitoring has led to the development of Internet of Things (IoT)-enabled solutions for real-time tracking and health assessment of cattle. 
+In this study, we present the development of a reinforcement learning-enabled cattle tracker prototype designed to optimize power consumption while ensuring continuous data collection and transmission. 
+The prototype integrates IoT sensors, solar power harvesting, and reinforcement learning-based decision-making to dynamically balance data transmission, storage, and energy conservation. 
+The reinforcement learning agent autonomously determines the optimal transmission schedule based on power availability, maximizing data efficiency while prolonging battery life. 
+The agent is trained on measured prototype data and the reward function is tuned from a Bayesian optimization to maximize the message collection.
+Experimental evaluations demonstrate the prototype's capability to sustain long-term operation under real-world environmental constraints. 
+The results highlight the feasibility of integrating machine learning with IoT devices for adaptive, energy-efficient cattle monitoring.
+Our findings contribute to the broader field of smart agriculture by demonstrating how reinforcement learning can be leveraged to enhance IoT-based livestock management. 
+Future work will focus on optimizing the decision-making model for diverse environmental conditions and scaling the system for larger deployments.
 
 \end{abstract}
 
@@ -117,7 +123,8 @@ The authors take advantage of corelation between sensor measurements to determin
 
 \section{System Design and Architecture}
 
-The design of an AIoT device is an iterative process, that loops between simulations, hardware development and measure.
+The design of an AIoT device is an iterative process, that loops between simulations, hardware development, measurement and redeployment.
+It is critical to have an automated process in place that can be updated without manual intervention.
 First, a model was created with assumed power consumption and generation numbers to validate the agent.
 Next the prototype was constructed and the power consumption measured to update the model.
 The prototype was also used to collect and measure days for power generation under stationary conditions.
@@ -144,9 +151,9 @@ The agent can choose one of three actions (i) transmit data (ii) collect and sto
 \begin{equation}
   \mathcal{A} = \left\{
   \begin{array}{l}
-  a_1 = \text{``transmit data''}, \\
-  a_2 = \text{``collect and store data''}, \\
-  a_3 = \text{``do nothing''}
+    a_0 = \text{``do nothing''}
+    a_1 = \text{``collect and store data''}, \\
+    a_2 = \text{``collect and transmit data''}, \\
   \end{array}
   \right.
   \end{equation}
@@ -164,9 +171,9 @@ The hyper parameters could be nagative and they were:
 \begin{itemize}
   \item reward\_power\_loss: the reward for losing power
   \item reward\_power\_multiplier: the reward for having excess power at every time step
-  \item reward\_action\_0: the reward for transmitting data
+  \item reward\_action\_0: the reward for doing nothing
   \item reward\_action\_1: the reward for collecting and storing data
-  \item reward\_action\_2: the reward for doing nothing
+  \item reward\_action\_2: the reward for collecting and transmitting data
   \item reward\_message\_count: the reward for the number of messages sent when transmission occurred
 \end{itemize}
 
@@ -208,7 +215,7 @@ A custom-build PCB with isolation of every component should experience a sleep c
 An unexpected side-benefit of a prototype with large power consumption is a fast development feedback cycle where the prototype drains the battery in days, rather than weeks. 
 
 \subsection{Firmware}
-The firmware for the protoype is written in C++ and is responsible for managing the power consumption of the device.
+The firmware for the prototype is written in C++ and is responsible for managing the power consumption of the device.
 The main loop runs at a 30 minute interval and the device alternates between sleeping and decision making.
 At each decision point the device reads the time, the power level of the battery, and the number of messages stored in the device and retrivees a recommended action.
 The device then takes the recommended action and updates the power level of the battery.
@@ -226,9 +233,40 @@ For example the cloud can update the device with a new policy for a new season, 
 
 
 \section{Results}
-
 The developed reinforcement learning-enabled cattle tracker prototype was successfully assembled and tested. 
 The prototype consists of key components such as a solar panel, battery, communication module, and processing unit, as shown in Figure~\ref{fig:prototype}.
+
+\subsection{Training Results}
+A baseline device that alternates between collection and transmission is used to compare the performance of the reinforcement learning agent.
+The results are shown in Table~\ref{tab:agent_comparison}.
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{lcc}
+      \toprule
+      & Baseline Agent & RL Agent \\
+      \midrule
+      Transmission Actions & 480 & 308 \\
+      Collection Actions & 480 & 652 \\
+      Sleep Actions & 0 & 0 \\
+      Avg. Message Count & 756.5 & 789.5 \\
+      Avg. Power Level & 34 & 76 \\
+      \bottomrule
+  \end{tabular}
+  \caption{Comparison of Baseline Agent and RL Agent}
+  \label{tab:agent_comparison}
+\end{table}
+
+The reinforcement learning agent outperforms the baseline agent by increasing the number of messages sent to the cloud by 4.3\% while maintaining a higher average power level by avoiding transmissions.
+
+\subsection{Deploymnet Results}
+
+
+
+
+
+
+
 
 \begin{figure}[htbp]
   \centering

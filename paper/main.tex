@@ -267,9 +267,10 @@ The trained agent performed on average 2.12 collection actions for every transmi
 
 \subsection{Deployment Results}
 
-The trained agent was deployed and evaluated on the prototype hardware in an indoor environment over a 9 day period with occasional manual charging to ensure continuous operation.
+The trained agent was deployed and evaluated on the prototype hardware without power generation in an indoor environment over a 9 day period with occasional manual charging to ensure continuous operation.
 This test evaluated the long-term performance of the agent and hardware system and the results are shown in Figure~\ref{fig:prototype_result}.
-The hardware did experience 
+The hardware experienced a few outages with the longest one being 3.6 hours on 2024-10-07.
+The deployed agent performed on average 2.18 collections for every transmission action, which matches the training results in simulation.
 
 \begin{figure}[h]
   \centering
@@ -294,18 +295,20 @@ Figure~\ref{fig:prototype_power} highlights the nonlinear discharge curve of the
 The discharge rate during sleeping is relatively constant and the nonlinearity is a result of the mapping function of voltage to remaining capacity.
 This nonlinearity poses a challenge to the agent, since it increases the error in future reward and remaining capacity estimation at lower power levels.
 
-
-
-The system was evaluated based on its power consumption, data transmission efficiency, and overall performance in real-world conditions. 
-The reinforcement learning algorithm optimized the power usage by balancing data collection, storage, and transmission to ensure continuous operation.
-
-Additionally, the power levels of the device over time were analyzed to assess energy efficiency. Figure~\ref{fig:power_levels} shows the variation in power consumption during different operational phases.
-
+Figure~\ref{fig:battery_vs_collection} shows the learned strategy for the agent under varying power levels.
+At full charge the agent prefers to altenate between collection and transmission, but as the power level decreases the agent prefers to collect data and store the messages for a median of 4 collections for every transmission at a power level of 30\%.
+At very low power levels the agent transmits data every time, which discharges the battery faster.
+This behaviour was an unexpected result of the simulation, where the device loses the messsages in the queue when power is lost.
+The agent learned to explot this inconsistency and did not want to lose a queue's worth of messages.
+The simuation will be corrected in future iterations.
 
 
 \section{Conclusion}
-In this study, we developed a reinforcement learning-enabled cattle tracker prototype designed to optimize power consumption while ensuring efficient data transmission and collection. The device successfully leverages reinforcement learning to dynamically adjust its operation based on available energy, enhancing battery life and operational efficiency. By incorporating solar power and an intelligent decision-making framework, the prototype demonstrates a feasible approach to long-term, autonomous cattle tracking.
-Future work will focus on improving the efficiency of the reinforcement learning model by integrating real-time adaptation to environmental changes. Additional experiments in diverse field conditions will provide further validation of the system's robustness. Further refinements to the hardware, such as low-power components and custom PCB design, will enhance reliability and longevity. Moreover, expanding the cloud-based digital twin functionality can improve remote monitoring and predictive analytics for herd management.
+In this study, we developed a reinforcement learning-enabled cattle tracker prototype designed to optimize power consumption while ensuring efficient data transmission and collection.
+The device successfully leverages q-learning adjust its strategy based on available energy, time of day, and message queue length enhancing battery life and operational efficiency.
+By incorporating solar power and an intelligent decision-making framework, the prototype demonstrates a feasible approach to long-term, autonomous cattle tracking.
+Future work will focus on continue the iterative process of model development and hardware improvement to improve the system's robustness.
+Further refinements to the hardware, such as low-power components and custom PCB design, will enhance reliability and longevity. 
 
 \section*{Acknowledgements}
 

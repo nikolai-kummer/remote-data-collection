@@ -2,13 +2,6 @@ import numpy as np
 
 from environment.device import Device
 
-def solar_intensity():
-    # Example implementation
-    # Replace with the actual calculation for solar intensity
-    intensity = np.zeros(48)
-    intensity[16:28] = 1
-    return intensity
-
 def get_solar_intensity(time_step: int, current_day: int = 0):
     cloudy_day = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.34, 0, 0, 0, 0.34, 0, 0.34,0.34, 5.19, 5.197, 2.310, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     sunny_day = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13.2, 23.8, 49.6, 68.6, 58.0, 75.81, 74.89, 89.46, 86.70, 105, 105, 105, 105, 105, 97.3, 58.7, 58.7, 25.8, 20.3, 14.9, 20.4, 3.95, 9.43, 9.4, 3.9,0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -27,11 +20,9 @@ class CustomEnv:
         self.MAX_MESSAGES = config['max_messages'] 
         self._device = Device(power_max=config['max_power'],
                               rounding_factor=(100/self.N_POWER_LEVELS))
-                            #   rounding_factor=int(100/self.N_POWER_LEVELS))
         self._time = 0
         self.current_day = 0
-        self.cloudy_chance = 0.7
-        self.solar_intensity_cache = solar_intensity()*30
+        self.cloudy_chance = config.get('cloudy_chance', 0.8)
         
     def init_state(self, power_level: float=50, time: int=0, message_count: int=0):
         self._device.set_power_percentage(power_level)
@@ -42,7 +33,6 @@ class CustomEnv:
         return self._device.calculate_rounded_power_level()
         
     def encode_state(self):
-        # discretized_power_level = self.get_power()
         return self._encode_state(self.get_power(), self._time, self._device._message_queue_length)
 
     def _encode_state(self, power_level, time, message_count):

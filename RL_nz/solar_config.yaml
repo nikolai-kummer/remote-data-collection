@@ -6,6 +6,7 @@ env:
   action_list: ['sleep', 'collect', 'send all']
   max_messages: 5
   power_levels: 100
+  cloudy_chance: 0.8
 
 agent:
   n_step: 5

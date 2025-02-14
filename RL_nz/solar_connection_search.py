@@ -45,7 +45,6 @@ def main():
             agent = DQNAgent(config['agent'], env)
 
             # Start training
-            env.cloudy_chance = 0.8
             message_count_list, power_list = train(env, agent, config['train'], plot_result_flag=False)
             message_counts.append(np.median(message_count_list[-1000:]))
             power_averages.append(np.median(power_list[-1000:]))

@@ -82,8 +82,10 @@ On one hand the addition of intelligence to the device allows it to make better 
 Q-learning is a reinforcement learning algorithm that is used to optimize the actions that an agent takes in an environment and has been used in a variety of applications such as optimizing the operation of IoT devices.
 
 In this paper we present the development of a cattle tracker prototype capable of data collection for extended periods of time.
-The main controbution of this paper is the development of a reinforcement learning agent that optimizes the power consumption of the device by allowing the agent to make decisions on when to transmit data, when to collect and store data, and when to do nothing.
+It is not trivial to manually determine the optimal data collection strategy for the device under dynamic and complex conditions \cite{suttonReinforcementLearningIntroduction2020} so we propose the addition of reinforcement learning to automate the decision making process.
+The main contribution of this paper is the development of a reinforcement learning agent that optimizes the power consumption of the device by allowing the agent to make decisions on when to transmit data, when to collect and store data, and when to do nothing.
 The hardware prototype uses solar power to extend the power budget of the device and the agent is trained to take advantage of excess power availability to increase the data transmission rate.
+The IoT device likely fits other use cases, but the focus in this paper is on the cattle tracking application due to the requirements of collecting uninterrupted data, occasionally needing to check in, needing to operate for long periods of time, and the potential for a mobile solar panel, which results in drastically different power generation.
 
 The cattle tracker alternates between sleeping to conserve power and decision making. 
 It is faced with three decision points: 
@@ -125,11 +127,7 @@ The authors take advantage of corelation between sensor measurements to determin
 
 The design of an AIoT device is an iterative process, that loops between simulations, hardware development, measurement and redeployment.
 It is critical to have an automated process in place that can be updated without manual intervention.
-First, a model was created with assumed power consumption and generation numbers to validate the agent.
-Next the prototype was constructed and the power consumption measured to update the model.
-The prototype was also used to collect and measure days for power generation under stationary conditions.
-The agent was then updated with the new power consumption and trained with randomly sampled data from the model.
-The agent was then deployed on the prototype and the power consumption was measured to validate the agent.
+The use of reinforcement learning greatly simplifies the process and allows the device to adapt to new conditions without a manual update of collection strategies.
 
 \subsection{Q-learning}
 
@@ -214,6 +212,13 @@ Testing on prototype-level hardware showed a high power consumption of 9.9 mA du
 A custom-build PCB with isolation of every component should experience a sleep current on the order of $\mu A$ and is planned for the the next iteration hardware to reduce power consumption during sleep.
 An unexpected side-benefit of a prototype with large power consumption is a fast development feedback cycle where the prototype drains the battery in days, rather than weeks. 
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.5\textwidth]{./figs/prototype.png}
+  \caption{Prototype of the reinforcement learning-enabled cattle tracker. The device consists of a solar panel for power harvesting, a rechargeable battery, and an embedded microcontroller for decision-making and communication.}
+  \label{fig:prototype}
+\end{figure}
+
 \subsection{Firmware}
 The firmware for the prototype is written in C++ and is responsible for managing the power consumption of the device.
 The main loop runs at a 30 minute interval and the device alternates between sleeping and decision making.
@@ -257,23 +262,13 @@ The results are shown in Table~\ref{tab:agent_comparison}.
   \label{tab:agent_comparison}
 \end{table}
 
-The reinforcement learning agent outperforms the baseline agent by increasing the number of messages sent to the cloud by 4.3\% while maintaining a higher average power level by avoiding transmissions.
+The reinforcement learning agent outperforms the baseline agent by increasing the number of messages sent to the cloud by 4.3\% while maintaining a higher average power level by avoiding excess transmission actions.
 
 \subsection{Deploymnet Results}
 
 
 
 
-
-
-
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.5\textwidth]{./figs/prototype.png}
-  \caption{Prototype of the reinforcement learning-enabled cattle tracker. The device consists of a solar panel for power harvesting, a rechargeable battery, and an embedded microcontroller for decision-making and communication.}
-  \label{fig:prototype}
-\end{figure}
 
 The system was evaluated based on its power consumption, data transmission efficiency, and overall performance in real-world conditions. 
 The reinforcement learning algorithm optimized the power usage by balancing data collection, storage, and transmission to ensure continuous operation.

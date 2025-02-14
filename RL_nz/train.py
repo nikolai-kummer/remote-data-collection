@@ -83,5 +83,6 @@ def train(env: CustomEnv, agent, train_config, plot_result_flag:bool=True, resul
         save_results(f'results/{result_prefix}reward_list.csv', reward_list)
         save_results(f'results/{result_prefix}legitimate_messages_list.csv', legitimate_messages_list)
         save_results(f'results/{result_prefix}power_list.csv', power_list)
+        save_results(f'results/{result_prefix}power_list.csv', action_list)
         
     return legitimate_messages_list, power_list

@@ -157,7 +157,7 @@ Alternatives to the tabular representation include deep Q-learning, which uses a
 A tabular representation only requires a sufficiently large memory to store the table.
 An additional benefit is that the table can be easily updated from the cloud as individual entries can be updated to reflect new conditions.
 
-The goal of the agent was to maximize the number of messages sent to the cloud, while minimizing the power consumption of the device.
+The goal of the agent is to maximize the number of messages sent to the cloud, while minimizing the power consumption of the device.
 It is not trivial to determine the reward values for the agent to maximize data collection.
 We consider the reward values to be hyperparameters that can be tuned to maximize the data collection and used a Bayesian optimization framework from the the python \verb|scikit-optimize| package to automatically tune the hyperparameters.
 The hyper parameters could be nagative and they were:
@@ -170,7 +170,17 @@ The hyper parameters could be nagative and they were:
   \item reward\_message\_count: the reward for the number of messages sent when transmission occurred
 \end{itemize}
 
-We ran repeated training sessions over solar gain data collected from the physical prototype that guided us toward the parameter set that maximizes data collection.
+The agent was trained on a simulated environment with the power consumption and generation numbers from the prototype.
+At every step, the environment would update the power level of the battery, the time of day, and the number of messages queued on the device depending on the action taken by the agent.
+The actual measured battery capacity was 1300 mAh and every 30 minutes the device would consume 5.0 mAh in sleeping.
+A power transmission would consume an additional 1.6 mAh and a data collection would consume an additional 0.1 mAh.
+
+Sample solar gain data from 17 days in June in Edmonton was turned into an average sunny day and an average cloudy day. 
+The environment would switch between the two days to simulate the weather conditions with an 80\% chance of a cloudy day.
+These conditions ensured that there was not sufficient power available to transmit data at every time step and forced the agent to learn strategies to increase message count.
+
+The training run was repeated 4 times each with a different random seed at every iteration of the hyper parameter search.
+Once an optimum set of hyperparameters was found, the action-value function was deployed into an h-file that was used in the firmware of the device.
 This automated approach was less labour intensive than manual tuning and has shown to be effective in optimizing the reward values.
 
 \subsection{Hardware}
@@ -179,33 +189,33 @@ The detailed specifications are shown in table \ref{tab:hardware_inventory}.
 
 \begin{table}[h!]
   \centering
-  \caption{Hardware Inventory}
-  \begin{tabular}{|l|l|l|l|}
+  \caption{Hardware List for the Cattle Tracker Prototype}
+  \begin{tabular}{|l|l|l|}
   \hline
-  \textbf{Hardware} & \textbf{Serial Number} & \textbf{Purpose} & \textbf{Specs} \\ \hline
-  Arduino MKR WiFi 1010 & ABX00023 & Connectivity & WiFi-enabled microcontroller board \\ \hline
-  Arduino MKR GPS Shield & ASX00017 & Location Tracking & Integrated GPS module \\ \hline
-  DFRobot Solar Power Manager & TPX00046 & Power Regulation & Manages and distributes solar cell and battery \\ \hline
-  Solar Panel & TPX00181 & Energy Generation & 75x100x2.9 mm panel, 5W output \\ \hline
-  Sparkfun Fuel Gage & 1568-1273-ND & Fuel Level Monitoring & Analog sensor for fuel measurement \\ \hline
-  LiPo Battery & 2528 & Energy Storage & 3.7V, 2000mAh capacity \\ \hline
+  \textbf{Hardware} & \textbf{Serial Number} &  \textbf{Description} \\ \hline
+  Arduino MKR WiFi 1010 & ABX00023 &  WiFi-enabled microcontroller board \\ \hline
+  Arduino MKR GPS Shield & ASX00017 &  Integrated GPS module \\ \hline
+  DFRobot Solar Power Manager & TPX00046 &  Manages and distributes solar cell and battery \\ \hline
+  Solar Panel & TPX00181 &  75x100x2.9 mm panel, 1W output \\ \hline
+  Sparkfun Fuel Gage & 1568-1273-ND & Analog sensor for power measurement \\ \hline
+  LiPo Battery & 2528 &  3.7V, 2000mAh capacity \\ \hline
   \end{tabular}
   \label{tab:hardware_inventory}
   \end{table}
 
-The prototype-level hardware experiences higher power consumption during sleeping, which results in shorter battery life. 
-A side-benefit of this larger power consumption is a faster feedback cycle for development and troubleshooting. 
-A custom-build PCB is planned for the production-level hardware to reduce power consumption during sleep and ensure robustness of the final device.
+Testing on prototype-level hardware showed a high power consumption of 9.9 mA during sleeping due to the presence of multiple LEDs and integrated components that could not be disabled. 
+A custom-build PCB with isolation of every component should experience a sleep current on the order of $\mu A$ and is planned for the the next iteration hardware to reduce power consumption during sleep.
+An unexpected side-benefit of a prototype with large power consumption is a fast development feedback cycle where the prototype drains the battery in days, rather than weeks. 
 
 \subsection{Firmware}
-The firmware for the device is written in C++ and is responsible for managing the power consumption of the device.
+The firmware for the protoype is written in C++ and is responsible for managing the power consumption of the device.
 The main loop runs at a 30 minute interval and the device alternates between sleeping and decision making.
 At each decision point the device reads the time, the power level of the battery, and the number of messages stored in the device and retrivees a recommended action.
 The device then takes the recommended action and updates the power level of the battery.
 
 The device is limited in its memory to store the policy.
-To pair down the table, the highest action for each state was selected.
-the policy was then stored as values that were bit-shifted to fit into a 32-bit integer.
+To pair down the table, only the highest action for each state was selected.
+The policy was then stored as values that were bit-shifted to fit into a 32-bit integer.
 
 \subsection{Cloud}
 The device transmits data to Azure IoT Central.
@@ -214,22 +224,21 @@ The digital twin is a digital representation of the device and can be used to mo
 The cloud enables two-way communication, which allows the device to receive updates and new policies from the cloud whenever it is connected.
 For example the cloud can update the device with a new policy for a new season, or a new policy for a new location that affects the solar gain.
 
-\section{Implementation}
-
-%TODO: Add sample power consumptions graphs
 
 \section{Results}
 
-The developed reinforcement learning-enabled cattle tracker prototype was successfully assembled and tested. The prototype consists of key components such as a solar panel, battery, communication module, and processing unit, as shown in Figure~\ref{fig:prototype}.
+The developed reinforcement learning-enabled cattle tracker prototype was successfully assembled and tested. 
+The prototype consists of key components such as a solar panel, battery, communication module, and processing unit, as shown in Figure~\ref{fig:prototype}.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.5\textwidth]{./figs/prototype_clean.png}
+  \includegraphics[width=0.5\textwidth]{./figs/prototype.png}
   \caption{Prototype of the reinforcement learning-enabled cattle tracker. The device consists of a solar panel for power harvesting, a rechargeable battery, and an embedded microcontroller for decision-making and communication.}
   \label{fig:prototype}
 \end{figure}
 
-The system was evaluated based on its power consumption, data transmission efficiency, and overall performance in real-world conditions. The reinforcement learning algorithm optimized the power usage by balancing data collection, storage, and transmission to ensure continuous operation.
+The system was evaluated based on its power consumption, data transmission efficiency, and overall performance in real-world conditions. 
+The reinforcement learning algorithm optimized the power usage by balancing data collection, storage, and transmission to ensure continuous operation.
 
 Additionally, the power levels of the device over time were analyzed to assess energy efficiency. Figure~\ref{fig:power_levels} shows the variation in power consumption during different operational phases.
 

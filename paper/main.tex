@@ -137,7 +137,7 @@ The hyper parameters could be nagative and their values are shown in Table~\ref{
 
 \begin{table}[h]
   \centering
-  \caption{Reward function parameters, their descriptions, and values extracted during hyperparameter tuning.}
+  \caption{Reward function parameters, descriptions, and values extracted during hyperparameter tuning.}
   \begin{tabular}{l p{8cm} c}
       \toprule
       \textbf{Parameter} & \textbf{Description} & \textbf{Value} \\
@@ -170,21 +170,24 @@ This automated approach was less labour intensive than manual tuning and has sho
 The hardware prototype is shown in figure \ref{fig:prototype} and consists of an Arduino microcontroller, a GPS device, a solar array, a power distribution system, and a battery.
 The detailed specifications are shown in table \ref{tab:hardware_inventory}.
 
-\begin{table}[h!]
+\begin{table}[h]
   \centering
-  \caption{Hardware List for the Cattle Tracker Prototype}
-  \begin{tabular}{|l|l|l|}
-  \hline
-  \textbf{Hardware} & \textbf{Serial Number} &  \textbf{Description} \\ \hline
-  Arduino MKR WiFi 1010 & ABX00023 &  WiFi-enabled microcontroller board \\ \hline
-  Arduino MKR GPS Shield & ASX00017 &  Integrated GPS module \\ \hline
-  DFRobot Solar Power Manager & TPX00046 &  Manages and distributes solar cell and battery \\ \hline
-  Solar Panel & TPX00181 &  75x100x2.9 mm panel, 1W output \\ \hline
-  Sparkfun Fuel Gage & 1568-1273-ND & Analog sensor for power measurement \\ \hline
-  LiPo Battery & 2528 &  3.7V, 2000mAh capacity \\ \hline
+  \caption{Hardware list for the cattle tracker prototype}
+  \begin{tabular}{l p{8cm} c}
+      \toprule
+      \textbf{Hardware} & \textbf{Description} & \textbf{Serial Number} \\
+      \midrule
+      Arduino MKR WiFi 1010 & WiFi-enabled microcontroller board & ABX00023 \\
+      Arduino MKR GPS Shield & Integrated GPS module & ASX00017 \\
+      DFRobot Solar Power Manager & Manages and distributes solar cell and battery & TPX00046 \\
+      Solar Panel & 75x100x2.9 mm panel, 1W output & TPX00181 \\
+      Sparkfun Fuel Gage & Analog sensor for power measurement & 1568-1273-ND \\
+      LiPo Battery & 3.7V, 2000mAh capacity & 2528 \\
+      \bottomrule
   \end{tabular}
   \label{tab:hardware_inventory}
-  \end{table}
+\end{table}
+
 
 Testing on prototype-level hardware showed a high power consumption of 9.9 mA during sleeping due to the presence of multiple LEDs and integrated components that could not be disabled. 
 A custom-build PCB with isolation of every component should experience a sleep current on the order of $\mu A$ and is planned for the the next iteration hardware to reduce power consumption during sleep.
@@ -192,22 +195,23 @@ An unexpected side-benefit of a prototype with large power consumption is a fast
 
 \begin{figure}[h]
   \centering
-  \begin{subfigure}{0.48\textwidth}
+  \begin{subfigure}[t]{0.48\textwidth}  % Align top
       \centering
-      \includegraphics[width=0.75\linewidth]{./figs/prototype.png}
-      \caption{Prototype power level over a 9 day collection window}
+      \includegraphics[height=6cm, keepaspectratio]{./figs/prototype.png}
+      \put(-170,160){\scriptsize \textbf{(A)}}  % Adjust position as needed
       \label{fig:prototype_real}
   \end{subfigure}
-  \hfill
-  \begin{subfigure}{0.48\textwidth}
+  \hspace{2mm}  % Reduce space between figures
+  \begin{subfigure}[t]{0.48\textwidth}  % Align top
       \centering
-      \includegraphics[width=\linewidth]{figs/prototype_diagram.png}
-      \caption{Overall architecture of the reinforcement learning-enabled cattle tracker}
+      \includegraphics[height=6cm, keepaspectratio]{./figs/prototype_diagram.png}
+      \put(-215,160){\scriptsize \textbf{(B)}}  % Adjust position as needed
       \label{fig:prototype_diagram}
   \end{subfigure}
-  \caption{Prototype of the reinforcement learning-enabled cattle tracker. The device consists of a solar panel for power harvesting, a rechargeable battery, and an embedded microcontroller for decision-making and communication.}
+  \caption{Prototype of the reinforcement learning-enabled cattle tracker. (A) Physical prototype with hardware components. (B) System architecture diagram illustrating data processing and power management.}
   \label{fig:prototype}
 \end{figure}
+
 
 \subsection{Firmware}
 The firmware for the prototype was Arduino C++ code and is responsible for collecting sensor data, making decisions, and transmitting data to the cloud (see Figure~\ref{fig:prototype_diagram}).
@@ -238,6 +242,7 @@ The results comparing the trained agent and the baseline are shown in Table~\ref
 
 \begin{table}[h]
   \centering
+  \caption{Comparison of baseline agent and RL agent}
   \begin{tabular}{lcc}
       \toprule
       & Baseline Agent & RL Agent \\
@@ -249,7 +254,6 @@ The results comparing the trained agent and the baseline are shown in Table~\ref
       Avg. Power Level & 34 & 76 \\
       \bottomrule
   \end{tabular}
-  \caption{Comparison of Baseline Agent and RL Agent}
   \label{tab:agent_comparison}
 \end{table}
 

@@ -214,7 +214,7 @@ An unexpected side-benefit of a prototype with large power consumption is a fast
 
 
 \subsection{Firmware}
-The firmware for the prototype was Arduino C++ code and is responsible for collecting sensor data, making decisions, and transmitting data to the cloud (see Figure~\ref{fig:prototype_diagram}).
+The firmware for the prototype was Arduino C++ code and is responsible for collecting sensor data, making decisions, and transmitting data to the cloud (see Figure~\ref{fig:prototype}).
 The main loop runs at a 30 minute interval and the device alternates between sleeping and decision making.
 At each decision point the device reads the time, the power level of the battery, and the number of messages stored in the device and retrivees a recommended action.
 The device then takes the recommended action and updates the power level of the battery.
@@ -272,31 +272,30 @@ The deployed agent performed on average 2.18 collections for every transmission 
   \begin{subfigure}{0.48\textwidth}
       \centering
       \includegraphics[width=\linewidth]{figs/prototype_power_level.png}
-      \caption{Prototype power level over a 9 day collection window}
+      \put(-195,138){\scriptsize \textbf{(A)}}  % Adjust position
       \label{fig:prototype_power}
   \end{subfigure}
   \hfill
   \begin{subfigure}{0.48\textwidth}
       \centering
       \includegraphics[width=\linewidth]{figs/battery_level_vs_collection_ratio.png}
-      \caption{Learned agent strategies as a function of power levels}
+      \put(-195,138){\scriptsize \textbf{(B)}}  % Adjust position
       \label{fig:battery_vs_collection}
   \end{subfigure}
-  \caption{Collected data from the prototype hardware highlighting a nonlinear power level discharge and the learned agent strategies.}
+  \caption{Collected data from the prototype hardware. (A) Nonlinear power level discharge over a 9-day period. (B) Learned agent strategies adapting to varying power levels.}
   \label{fig:prototype_result}
 \end{figure}
 
-Figure~\ref{fig:prototype_power} highlights the nonlinear discharge curve of the battery over the 9 day period. 
+Figure~\ref{fig:prototype_result}\subref{fig:battery_vs_collection}A highlights the nonlinear discharge curve of the battery over the 9 day period. 
 The discharge rate during sleeping is relatively constant and the nonlinearity is a result of the mapping function of voltage to remaining capacity.
 This nonlinearity poses a challenge to the agent, since it increases the error in future reward and remaining capacity estimation at lower power levels.
 
-Figure~\ref{fig:battery_vs_collection} shows the learned strategy for the agent under varying power levels.
+Figure~\ref{fig:prototype_result}\textsubscript{\subref{fig:battery_vs_collection}}B shows the learned strategy for the agent under varying power levels.
 At full charge the agent prefers to altenate between collection and transmission, but as the power level decreases the agent prefers to collect data and store the messages for a median of 4 collections for every transmission at a power level of 30\%.
 At very low power levels the agent transmits data every time, which discharges the battery faster.
 This behaviour was an unexpected result of the simulation, where the device loses the messsages in the queue when power is lost.
 The agent learned to explot this inconsistency and did not want to lose a queue's worth of messages.
 The simuation will be corrected in future iterations.
-
 
 \section{Conclusion}
 In this study, we developed a reinforcement learning-enabled cattle tracker prototype designed to optimize power consumption while ensuring efficient data transmission and collection.

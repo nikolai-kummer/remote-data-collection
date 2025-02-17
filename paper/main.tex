@@ -39,7 +39,7 @@ IoT-based cattle trackers enable real-time livestock monitoring, but their energ
 Efficient power management is critical to ensure continuous data collection while maximizing battery life.
 This study presents a Q-learning-enabled IoT device that dynamically adjusts data collection and transmission schedules to optimize power efficiency.
 The reinforcement learning agent adapts its strategy based on battery state, time of day, and message queue size.
-The reward function is fine-tuned using Bayesian optimization to maximize data continuity and power levels.
+The reward function is tuned using Bayesian optimization to maximize data continuity and power levels.
 Simulation results show an increase in 4.3\% in message count at a substantially higher average power level compared to a fixed scheduling approach of alternating collection and transmission.
 The agent was deployed on prototype hardware over 9 days and demonstrated the ability to adaptively collect and transmit data to the cloud. 
 These findings highlight the potential for power-adaptive reinforcement learning in IoT systems, contributing to energy-efficient smart agriculture.
@@ -54,13 +54,14 @@ Internet of Things (IoT), Reinforcement Learning, Cattle Monitoring.
 \copyrightnotice
 
 \section{Introduction}
-Timely tracking of free-range beef cattle is essential to assess herd health and monitor animal rest, grazing, and rumination behaviours.
+Timely tracking of free-range beef cattle is essential to assess herd health and monitor rest, grazing, and rumination behaviours.
 Understanding grazing patterns on pasture enables cattle producers to optimize feed efficiency, reducing production cost, and lowering environmental impact.
 Internet of Things (IoT)-based solutions have been developed to replace labor-intensive manual observation with automated, real-time monitoring \cite{unoldIoTBasedCowHealth2020} \cite{yamsaniIoTBasedLivestockMonitoring2024}.
-The devices take the form of collars, leg bands, or ear tags and are small, low power, equipped with sensors and communication modules, and have limited communication capabilities, but provide insights into the environment that they are deployed in \cite{unoldIoTBasedCowHealth2020} \cite{moutaouakilDigitalFarmingSurvey2023}.
+The devices take the form of collars, leg bands, or ear tags and are small, low power, and equipped with sensors and communication modules.
+While their communication abilities are limited, they provide valuable insights into the environment that they are deployed in \cite{unoldIoTBasedCowHealth2020} \cite{moutaouakilDigitalFarmingSurvey2023}.
 However, their installation is a time consuming process, making long-term autonomous operation (months), without human intervention, a key requirement.
-Power limitations remain another significant challenge, as frequent data transmission depletes battery, necessitrating the design of energy-efficient solutions.
-Solar panels can extend battery life, while their effectiveness relys heavily on weather conditions and the cattle's orientation and location.
+Power limitations remain another significant challenge, as frequent data transmission depletes battery, necessitating the design of energy-efficient solutions.
+Solar panels can extend battery life but their effectiveness relies heavily on weather conditions and the cattle's orientation and location.
 
 Reinforcement learning (RL) is a branch of machine learning that allows an agent to learn strategies to maximize a reward.
 The agent learns by interacting with the environment and updating its behaviour based on the received rewards for those actions\cite{suttonReinforcementLearningIntroduction2020}.
@@ -68,10 +69,9 @@ The combination of reinforcement learning and IoT devices, also called the Artif
 The TinyML paradigm, a subset of AIoT, focuses on machine learning on devices with highly constrained resources and is often limited to inference only\cite{rayReviewTinyMLStateoftheart2022}.
 Overall, the addition of intelligence to the device allows it to make better decisions, however, on the other hand the addition of intelligence to the device increases the power consumption of the device.
 
-In this paper, we present a reinforcement learning-enabled cattle tracker prototype that autonomously optimizes power consumption by deciding when to transmit, store, or delay data collection.
-The Q-learning-based agent adapting to varying power availability and the device incorporates solar power to extend operational longevity.
-Our approach ensures uninterrupted monitoring while balancing energy efficiency and data quality. 
-By leveraging RL, the proposed system outperforms static scheduling approaches, allowing for the collection of uninterrupted data, as well as occasionally check in, making it a viable solution for long-term autonomous cattle tracking.
+In this paper, we present a reinforcement learning-enabled cattle tracker prototype that optimizes power consumption by deciding when to transmit, store, or delay data collection.
+The physical device incorporates a solar panel to extend operational longevity, while the Q-learning-based agent adapts to varying power availability to maintain continuous data collection. 
+Our approach leverages RL to outperform static scheduling approaches, ensuring uninterrupted monitoring while strategically checking in and transmitting data, making it a viable solution for long-term autonomous cattle tracking.
 
 \section{Related Work}
 % IoT and Cloud
@@ -95,30 +95,30 @@ Our system leverages RL-driven decision-making for a single device to balance da
 
 AIoT device design is an iterative process involving simulations, hardware development, measurement, and redeployment
 Automation is essential to facilitate rapid development with reduced human intervention.
-RL helps this process by allowing the device to adapt to new parameters without the need for manual update of collection strategies.
+RL helps this process by allowing the agent to adapt to new device properties without the need for manual update of collection strategies.
 
 \subsection{Q-learning}
 
-Central to Q-learning, a widely used RL approach, is the action-value function $Q(S_t, A_t)$, which is the expected cumulative reward of taking action $a$ in state $s$.
+Central to Q-learning, a widely used RL approach, is the action-value function $Q(S_t, A_t)$, which is the expected cumulative reward of taking action $A_t$ in state $S_t$.
 The agent approximates the optimal policy by updating the action-value function based on the reward that it receives during training\cite{suttonReinforcementLearningIntroduction2020}:
 
 \begin{equation}
 Q^{new}(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha \left[ R_{t+1} + \gamma \max_{a} Q(S_{t+1}, a) - Q(S_t, A_t) \right]
 \end{equation}
 
-where $\alpha$ is the learning rate, $\gamma$ is the discount factor, and $R_{t+1}$ and $S_{t+1}$ is the reward and state after taking action $A_t$ in state $S_{t}$, respectively.
+where $\alpha$ is the learning rate, $\gamma$ is the discount factor, and $R_{t+1}$ and $S_{t+1}$ are the reward and state after taking action $A_t$ in state $S_{t}$, respectively.
 
 The agent's state consists of time of day $T$, battery power level $p$, and queued message count $m$.
 $T$ (discretized into 48 bins) informs the power generation likelihood, $p$ was discretized to 100 levels, and $m$ was discretized to 5 levels to enforce a transmission check every 2.5 hours to prevent data loss.
 This resulted in $T\times p \times m = 24,000$ possible states. The agent action space contains three discrete actions: $\mathcal{A}=\{a_0, a_1, a_2\}$, where $a_0=$delay data collection, $a_1=$collect and store data, and $a_2=$collect and transmit data, turning the action-value function into a $24000 \times 3$ table.
 
 A tabular representation for $Q(S_t, A_t)$ was used as it turns the model inference into a table lookup with $O(1)$ complexity.
-Deep Q-learning alternatives, which use a neural network to approximate $Q(S_t, A_t)$ require additional on-device compuation and were not considered.
+Deep Q-learning alternatives, which use a neural network to approximate $Q(S_t, A_t)$ require additional on-device computation and were not considered.
 A tabular representation does require larger memory or storage, but can be partially updated from the cloud to reflect new conditions.
 
 The goal of the agent is to maximize the number of messages sent to the cloud and the power level of the device.
 It is not trivial to determine the reward values that achieve this goal.
-We consider the reward values to be hyperparameters and used a Bayesian optimization framework from the the python \verb|scikit-optimize| package to tune them.
+We consider the reward values to be hyperparameters and used a Bayesian optimization framework from the python \verb|scikit-optimize| package to tune them.
 The hyperparameters (Table~\ref{tab:reward_parameters}) show that the most negative reward is for delaying collection. 
 The reward for transmitting data also collects the reward per message, which only becomes attractive if there are messages in the queue.
 
@@ -142,7 +142,7 @@ The reward for transmitting data also collects the reward per message, which onl
 
 The agent was trained in a simulated environment with the power consumption and generation numbers collected from the prototype hardware.
 At each step, the environment updates the battery level, time of day, and queued messages based on the agent's action.
-The 1300 mAh battery (discretized into 100 levels) drains 5.0 mAh per 30 minutes in sleep mode, while transmission and data collection consume 1.6 mAh and 0.1 mAh, respectively.
+The battery (discretized into 100 levels) drains 5.0 mAh per 30 minutes in sleep mode, while transmission and data collection consume 1.6 mAh and 0.1 mAh, respectively.
 
 Solar gain data from 17 June days in Edmonton was averaged into sunny and cloudy profiles, with an 80\% probability of a cloudy day. 
 This constraint limited power availability, forcing the agent to optimize message transmission. 
@@ -152,9 +152,9 @@ This automated approach reduced manual effort and effectively optimized reward v
 
 
 \subsection{Hardware}
-The hardware prototype is shown in figure \ref{fig:prototype} and consists of an Arduino microcontroller, a GPS device, a solar array, a power distribution system, and a battery.
-The detailed specifications are shown in table \ref{tab:hardware_inventory}. 
-Prototype testing revealed high sleep power consumption (9.9 mA) due to always-on LEDs and integrated components. 
+The hardware prototype is shown in Figure \ref{fig:prototype} and consists of an Arduino microcontroller, a GPS device, a solar array, a power distribution system, and a battery.
+The detailed specifications are shown in Table \ref{tab:hardware_inventory}. 
+Prototype testing revealed high sleep power consumption (9.9 mA) caused by always-on LEDs and integrated components. 
 A custom PCB with full component isolation is planned to reduce sleep current to $\mu A$ levels.
 An unexpected benefit of high power draw was a faster development cycle, as battery depletion occurred in days rather than weeks.
 
@@ -167,10 +167,10 @@ An unexpected benefit of high power draw was a faster development cycle, as batt
       \midrule
       Arduino MKR WiFi 1010 & WiFi-enabled microcontroller board & ABX00023 \\
       Arduino MKR GPS Shield & Integrated GPS module & ASX00017 \\
-      DFRobot Solar Power Manager & Power dsitribution board & TPX00046 \\
+      DFRobot Solar Power Manager & Power distribution board & DFR0559 \\
       Solar Panel & 75x100x2.9 mm panel, 1W output & TPX00181 \\
-      Sparkfun Fuel Gage & Analog sensor for power measurement & 1568-1273-ND \\
-      LiPo Battery & 3.7V, 2000mAh capacity & 2528 \\
+      Sparkfun Fuel Gage & Power measurement sensor & MAX17043 \\
+      LiPo Battery & 3.7V, 2100mAh rated, 1300mAh eff. capacity & 2528 \\
       \bottomrule
   \end{tabular}
   \label{tab:hardware_inventory}
@@ -199,9 +199,9 @@ An unexpected benefit of high power draw was a faster development cycle, as batt
 \subsection{Firmware}
 The prototype firmware, written in Arduino C++, handles sensor data collection, decision-making, and cloud transmission (see Figure~\ref{fig:prototype} B). 
 The main loop runs every 30 minutes, alternating between sleep mode and decision-making.
-At each decision point, the device reads the time, battery level, and queued messages, retrieves a recommended action, and executes it.
+At each decision point, the device reads the time, battery level, and queued messages, retrieves a recommended action from the policy table, and executes it.
 Due to memory constraints, only the highest-value action per state was stored, reducing the policy table size. 
-The policy was bit-shifted into and array of 32-bit integers for efficient storage in memory.
+The policy was bit-shifted into an array of 32-bit integers for efficient storage in memory.
 
 
 \subsection{Cloud}

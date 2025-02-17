@@ -12,7 +12,7 @@
 \volumeheader{38}{0}%{00.000}
 \begin{center}
 
-\title{Development of a Reinforcement Learning Enabled Cattle Tracker Prototype}
+\title{Power-Aware Data Collection for IoT Cattle Tracking Using Reinforcement Learning}
 \maketitle
 
 \thispagestyle{empty}
@@ -35,15 +35,15 @@ First Author\upstairs{\affilone,*}, Second Author\upstairs{\affilone}, Third Aut
 \end{center}
 
 \begin{abstract}
-The increasing demand for precision livestock monitoring has led to the development of Internet of Things (IoT)-enabled solutions for real-time tracking and health assessment of cattle. 
-In this study, we present the development of a reinforcement learning-enabled cattle tracker prototype designed to optimize power consumption while ensuring continuous data collection and transmission. 
-The prototype integrates IoT sensors, solar power collection, and reinforcement learning-based decision-making to dynamically balance data transmission, storage, and energy conservation. 
-The reinforcement learning agent autonomously determines the optimal transmission schedule based on power availability, maximizing data efficiency while prolonging battery life. 
-The agent is trained on measured prototype data and the reward function is tuned from a Bayesian optimization to maximize the message collection.
-Experimental evaluations demonstrate the prototype's capability to sustain long-term operation under real-world environmental constraints. 
-The results highlight the feasibility of integrating machine learning with IoT devices for adaptive, energy-efficient cattle monitoring.
-Our findings contribute to the broader field of smart agriculture by demonstrating how reinforcement learning can be leveraged to enhance IoT-based livestock management. 
-Future work will focus on optimizing the decision-making model for diverse environmental conditions and scaling the system for larger deployments.
+IoT-based cattle trackers enable real-time livestock monitoring, but their energy constraints limit long-term deployment in remote environments.
+Efficient power management is critical to ensure continuous data collection while maximizing battery life.
+This study presents a Q-learning-enabled IoT device that dynamically adjusts data collection and transmission schedules to optimize power efficiency.
+The reinforcement learning agent adapts its strategy based on battery state, time of day, and message queue size.
+The reward function is fine-tuned using Bayesian optimization to maximize data continuity and power levels.
+Simulation results show an increase in 4.3\% in message count at a substantially higher average power level compared to a fixed scheduling approach of alternating collection and transmission.
+The agent was deployed on prototype hardware over 9 days and demonstrated the ability to adaptively collect and transmit data to the cloud. 
+These findings highlight the potential for power-adaptive reinforcement learning in IoT systems, contributing to energy-efficient smart agriculture.
+Future work will focus on hardware hardening and the expansion of the agent to account for message age.
 
 \end{abstract}
 
@@ -54,8 +54,8 @@ Internet of Things (IoT), Reinforcement Learning, Cattle Monitoring.
 \copyrightnotice
 
 \section{Introduction}
-
-Timely tracking of free range beef cattle is essential for farmers to assess herd health and monitor animal behaviors. 
+Timely tracking of free-range beef cattle is essential to assess herd health and monitor animal rest, grazing, and rumination behaviours.
+Understanding grazing patterns on pasture enables cattle producers to optimize feed efficiency, reducing production cost, and lowering environmental impact.
 Internet of Things (IoT)-based solutions have been developed to replace labor-intensive manual observation with automated, real-time monitoring \cite{unoldIoTBasedCowHealth2020} \cite{yamsaniIoTBasedLivestockMonitoring2024}.
 The devices take the form of collars, leg bands, or ear tags and are small, low power, equipped with sensors and communication modules, and have limited communication capabilities, but provide insights into the environment that they are deployed in \cite{unoldIoTBasedCowHealth2020} \cite{moutaouakilDigitalFarmingSurvey2023}.
 However, their installation is a time consuming process, making long-term autonomous operation (months), without human intervention, a key requirement.

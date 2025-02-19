@@ -1,0 +1,89 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%    Canadian AI Latex Template    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[10pt]{cai}
+\captionsetup{font=small}
+\begin{document}
+% Editorial staff will replace the following values:
+% 1. Conference Year
+% 2. Issue number
+% 3. Article DOI
+\def\conferenceyear{2025}
+\volumeheader{38}{0}%{00.000}
+\begin{center}
+
+\title{Eco Tracker Appendix}
+\maketitle
+
+\thispagestyle{empty}
+
+% Add Authors and Affiliations in the camera ready
+% for the double blind review, please leave this section as is 
+\begin{tabular}{cc}
+First Author\upstairs{\affilone,*}, Second Author\upstairs{\affilone}, Third Author\upstairs{\affilthree}
+\\[0.25ex]
+{\small \upstairs{\affilone} Affiliation One} \\
+{\small \upstairs{\affiltwo} Affiliation Two} \\
+{\small \upstairs{\affilthree} Affiliation Three} \\
+\end{tabular}
+  
+% Replace with corresponding author email address
+\emails{
+  \upstairs{*}corresponding\_author@example.ca 
+}
+\vspace*{0.2in}
+\end{center}
+
+\begin{abstract}
+This is an appendix of additional material that we don't have room to put into the paper.
+This material will allow us to expand if needed and is here to test our own understanding of the the underlying mechanisms.
+
+\end{abstract}
+
+% add your keywords
+\begin{keywords}{Keywords:}
+Internet of Things (IoT), Reinforcement Learning, Cattle Monitoring.
+\end{keywords}
+\copyrightnotice
+
+\section{Simple Battery Drain Baseline}
+An initial experiment to verify that an agent is capable of learning involved a simple battery drain test.
+The battery was fully charged and the agent was run for as long as needed to discharge the battery while trying to maximize message collection/transmission.
+The agent was compared to a simple baseline static stragy of alternating transmission and collection.
+The baseline strategies are as follows:
+\begin{itemize}
+  \item Baseline 0: Take the Transmission action every time
+  \item Baseline 1: Collect once, transmit once
+  \item Baseline 2: Collect twice, transmit once
+  \item Baseline 3: Collect three times, transmit once
+  \item Baseline 4: Collect four times, transmit once
+\end{itemize}
+
+\begin{table}[h]
+  \centering
+  \caption{Comparison of Baseline Models and RL Agent}
+  \begin{tabular}{lcccccc}
+      \toprule
+      & \textbf{Baseline 0} & \textbf{Baseline 1} & \textbf{Baseline 2} & \textbf{Baseline 3} & \textbf{Baseline 4} & \textbf{Agent} \\
+      \midrule
+      Collection + Transmission Action & 205 & 117 & 81  & 62  & 50  & 54  \\
+      Collection Action                 & 0   & 117 & 162 & 186 & 200 & 198 \\
+      Total Messages                     & 205 & 234 & 243 & 248 & 250 & 252 \\
+      \bottomrule
+  \end{tabular}
+  \label{tab:batter_drain_result}
+\end{table}
+
+The results are shown in Table \ref{tab:batter_drain_result}.
+The baseline is able to send the most messages if it collects four times and sends three times.
+This would seem like the most optimum strategy, but the static schedule gets into trouble when the battery runs out and the entire queue of messages is lost.
+The agent learns an optimal strategy of collecting four times and sending once except when the battery is low.
+In this case, the agent transmits more frequently to not lose the queue of messages.
+
+
+% All references should be stored in the file "references.bib".
+% That call to use that file is in "cai.cls". 
+% Please do not modify anything below this line.
+\printbibliography[heading=subbibintoc]
+
+\end{document}

@@ -1,22 +1,37 @@
-import yaml
+from copy import deepcopy
 from train import train
 from agent.baseline_agent import BaselineAgent
+from agent.tabular_agent import TabularAgent
+from utils.yaml_helper import load_config
 from environment.custom_env import CustomEnv
 
-def main():
-    # Load configuration
-    with open('config_baseline.yaml', 'r') as f:
-        config = yaml.safe_load(f)
-    
-    # Initialize environment and agent
-    env = CustomEnv(config['env'])
-    baseline_agent = BaselineAgent(env)
-
-    # Try out baseline agent
-    env.cloudy_chance = 1.0
-    train(env, baseline_agent, config['train'], plot_result_flag=True, result_prefix="baseline_")
-    
-    
+# Function for the simple battery drain baseline experiment
 
 if __name__ == "__main__":
-    main()
+    # configure config files
+    config_list = []
+    prefix_list = []
+    agent_list = []
+    
+    agent_config = load_config('simple_battery_drain_optimum.yaml')
+    for k in range(5):
+        baseline_config = deepcopy(agent_config)
+        baseline_config['train']['num_episodes'] = 1
+        baseline_config['agent']['repeat_action1'] = k
+        config_list.append(baseline_config)
+        
+        prefix = f"simple_battery_drain_baseline_{k}_"
+        prefix_list.append(prefix)
+        agent_list.append(BaselineAgent)
+        
+    config_list.append(agent_config)
+    prefix_list.append("simple_battery_drain_optimum_")
+    agent_list.append(TabularAgent)
+    
+    for config, prefix, agent_class in zip(config_list, prefix_list, agent_list):
+        # Initialize environment and agent
+        env = CustomEnv(config['env'])
+        env.cloudy_chance = 1.0
+        
+        agent = agent_class(config['agent'], env)
+        train(env, agent, config['train'], plot_result_flag=True, result_prefix=prefix)

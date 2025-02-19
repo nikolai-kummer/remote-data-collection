@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from datetime import date
 
 from train import train, set_seed
-from agent.dqn_agent import DQNAgent
+from agent.tabular_agent import TabularAgent
 from environment.custom_env import CustomEnv
 
 def main():
@@ -15,7 +15,7 @@ def main():
     
     # Initialize environment and agent
     env = CustomEnv(config['env'])
-    agent = DQNAgent(config['agent'], env)
+    agent = TabularAgent(config['agent'], env)
 
     # Start training
     env.cloudy_chance = 0.8

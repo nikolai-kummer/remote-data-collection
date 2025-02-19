@@ -22,7 +22,7 @@ def main():
     for i in range(1000):
         msg_list, pwr_list = train(env, baseline_agent, config['train'], plot_result_flag=False, result_prefix="baseline_solar_")
         message_list.append(msg_list[-1])
-        power_list.append(np.median(pwr_list[-1]))
+        power_list.append(np.median(pwr_list))
     
 
     print(f"Average messages sent: {np.median(message_list)}")
@@ -42,7 +42,7 @@ def main():
     axs[0].text(avg_power, 10, f'Median Power:\n {avg_power:.2f}', rotation=90, color='r')
     
     axs[1].hist(message_list)
-    # axs[1].set_title("Messages Sent")
+    axs[1].set_title("Messages Sent")
     # plot a red line showing the average messages sent
     avg_messages = np.median(message_list)
     axs[1].axvline(avg_messages, color='r', linestyle='dashed', linewidth=1)

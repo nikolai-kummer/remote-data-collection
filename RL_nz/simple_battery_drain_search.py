@@ -6,7 +6,7 @@ from skopt import gp_minimize
 from skopt.space import Real, Integer
 from skopt.utils import use_named_args
 from train import train, set_seed
-from agent.dqn_agent import DQNAgent
+from agent.tabular_agent import TabularAgent
 from environment.custom_env import CustomEnv
 
 
@@ -41,7 +41,7 @@ def main():
             
             # Initialize environment and agent
             env = CustomEnv(config['env'])
-            agent = DQNAgent(config['agent'], env)
+            agent = TabularAgent(config['agent'], env)
 
             # Start training
             env.cloudy_chance = 1.0

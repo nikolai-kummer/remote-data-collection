@@ -1,9 +1,10 @@
 import numpy as np
 import os
 import random
+from agent.agent import Agent
 from collections import deque
 
-class DQNAgent:
+class TabularAgent(Agent):
     def __init__(self, config, env):
         self.alpha = config['alpha']
         self.gamma = config['gamma']

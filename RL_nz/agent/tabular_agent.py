@@ -3,6 +3,18 @@ import os
 from agent.agent import Agent
 from collections import deque
 
+from numba import njit
+
+@njit
+def numba_argmax(arr):
+    max_val = arr[0]
+    max_index = 0
+    for i in range(1, arr.shape[0]):
+        if arr[i] > max_val:
+            max_val = arr[i]
+            max_index = i
+    return max_index
+
 class TabularAgent(Agent):
     def __init__(self, config, env):
         self.alpha = config['alpha']
@@ -20,7 +32,7 @@ class TabularAgent(Agent):
         if np.random.rand() < self.epsilon:
             return np.random.randint(0, self.N_ACTIONS - 1)
         else:
-            return np.argmax(self.Q_matrix[state])
+            return numba_argmax(self.Q_matrix[state])
         
     def store_step(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))

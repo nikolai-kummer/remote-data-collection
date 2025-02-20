@@ -17,13 +17,13 @@ def main():
 
     # Define the search space
     space = [
-        # Integer(3000, 6000,  name='num_episodes'),
-        Real(-15.0, 0.0, name='reward_power_loss'),
-        Real(0.0001, 0.01, name='reward_power_multiplier'),
-        Real(-2.0, 2.0, name='reward_action_0'),
-        Real(-2.0, 2.0, name='reward_action_1'),
-        Real(-2.0, 2.0, name='reward_action_2'),
-        Real(0.1, 3.0, name='reward_message_count')
+        Integer(1000, 6000,  name='num_episodes'),
+        # Real(-15.0, 0.0, name='reward_power_loss'),
+        Real(-0.5, 0.5, name='reward_power_multiplier'),
+        Real(-3.0, 3.0, name='reward_action_0'),
+        Real(-3.0, 3.0, name='reward_action_1'),
+        Real(-3.0, 3.0, name='reward_action_2'),
+        Real(-3.0, 3.0, name='reward_message_count')
     ]
     
     @use_named_args(space)

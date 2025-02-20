@@ -1,0 +1,25 @@
+env:
+  max_power: 1300
+  min_power: 0
+  n_days: 20
+  time_intervals: 48
+  action_list: ['sleep', 'collect', 'send all']
+  max_messages: 5
+  power_levels: 100
+  cloudy_chance: 0.8
+
+agent:
+  n_step: 5
+  alpha: 0.1
+  gamma: 0.9
+  epsilon: 1.0
+  epsilon_decay: 0.995
+
+train:
+  num_episodes: 100
+  reward_power_loss: 0.0
+  reward_power_multiplier: 0.0001
+  reward_action_0: -1.7163689752956093
+  reward_action_1: -0.5999029879120295
+  reward_action_2: -1.4845465646532197
+  reward_message_count: 0.8413013889155135

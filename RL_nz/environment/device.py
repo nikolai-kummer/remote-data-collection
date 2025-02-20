@@ -1,4 +1,3 @@
-
 class Device:
     _power_current: float
     _power_max: float
@@ -75,8 +74,9 @@ class Device:
     
     def add_power(self, power: float) -> None:
         """ Adds power to the current power level """
-        self._power_current += power
-        self._power_current = min(self._power_current, self._power_max)
+        power_current = self._power_current
+        power_current += power
+        self._power_current = min(power_current, self._power_max)
         
     
     

@@ -80,6 +80,24 @@ This would seem like the most optimum strategy, but the static schedule gets int
 The agent learns an optimal strategy of collecting four times and sending once except when the battery is low.
 In this case, the agent transmits more frequently to not lose the queue of messages.
 
+\section{Solar Baseline}
+\begin{table}[h!]
+  \centering
+  \begin{tabular}{lcccccc}
+  \hline
+   & Baseline 0 & Baseline 1 & Baseline 2 & Baseline 3 & Baseline 4 & Agent \\
+  \hline
+  Transmission Actions & 960 & 480 & 320 & 240 & 190 & 308 \\
+  Collection Actions   & 0   & 480 & 640 & 720 & 770 & 652 \\
+  Sleep Actions        & 0   & 0   & 0   & 0   & 0   & 0   \\
+  Avg. Message Count   & 709 & 766.5 & 769 & 782 & 805 & 790 \\
+  Avg. Power Level     & 45  & 52  & 55  & 55  & 57  & 55  \\
+  \hline
+  \end{tabular}
+  \caption{Comparison of Baselines and Agent Performance}
+  \label{table:baselines_vs_agent}
+  \end{table}
+  
 
 % All references should be stored in the file "references.bib".
 % That call to use that file is in "cai.cls". 

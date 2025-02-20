@@ -24,7 +24,10 @@ class Device:
         self._rounding_factor = rounding_factor
         self._message_queue_length = 0
         self._max_message_queue_length = 5
-        pass
+        
+        # precomputed values
+        self._idle_collect = power_idle + power_collect
+        self._idle_transmit = power_idle + power_transmit
 
     
     def get_power_level_float(self) -> float:
@@ -42,22 +45,23 @@ class Device:
     def take_action(self, action: int) -> None:
         """ Takes an action and updates the power level accordingly. """
         messages_send = 0
+        power_current = self._power_current
         if action == 0:
-            self._power_current -= self._power_idle
+            power_current -= self._power_idle
         elif action == 1:
-            power_consumed = self._power_idle + self._power_collect
-            if self._power_current >= power_consumed:
+            power_consumed = self._idle_collect
+            if power_current >= power_consumed:
                 self._message_queue_length = min(self._message_queue_length+1, self._max_message_queue_length)
-            self._power_current -= power_consumed
+            power_current -= power_consumed
         elif action == 2:
-            power_consumed = self._power_idle + self._power_transmit
-            if self._power_current >= power_consumed:
+            power_consumed = self._idle_transmit
+            if power_current >= power_consumed:
                 messages_send = min(self._message_queue_length + 1, self._max_message_queue_length)
                 self._message_queue_length = 0
-            self._power_current -= power_consumed
+            power_current -= power_consumed
         else:
             raise ValueError("Invalid action")
-        self._power_current = max(0, self._power_current)
+        self._power_current = max(0, power_current)
         return messages_send
     
     def set_power_percentage(self, power_level_percent: float) -> None:

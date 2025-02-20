@@ -1,6 +1,5 @@
 import numpy as np
 import os
-import random
 from agent.agent import Agent
 from collections import deque
 
@@ -13,13 +12,13 @@ class TabularAgent(Agent):
         self.N_STATES = (env.N_POWER_LEVELS+1) * (env.N_TIME_INTERVALS+1) * env.MAX_MESSAGES
         self.N_ACTIONS = env.N_ACTIONS
         self.n_step = config.get('n_step', 3)  # Number of steps to look back
-
+        self.gamma_powers = self.gamma ** np.arange(self.n_step + 1)
         self.Q_matrix = np.random.uniform(low=-0.01, high=0.01, size=(self.N_STATES, self.N_ACTIONS))
         self.memory = deque(maxlen=self.n_step)
 
     def select_action(self, state):
-        if random.uniform(0, 1) < self.epsilon:
-            return random.randint(0, self.N_ACTIONS - 1)
+        if np.random.rand() < self.epsilon:
+            return np.random.randint(0, self.N_ACTIONS - 1)
         else:
             return np.argmax(self.Q_matrix[state])
         
@@ -34,17 +33,18 @@ class TabularAgent(Agent):
     def update_q_values(self):
         # Calculate the n-step return
         G = 0
-        for i in range(len(self.memory)):
+        n = len(self.memory)
+        for i in range(n):
             state, action, reward, next_state, done = self.memory[i]
-            G += (self.gamma ** i) * reward
+            G += self.gamma_powers[i] * reward
 
         # If the episode is not done, bootstrapping from the Q-value of the next state
         if not self.memory[-1][4]:  # Check if the last stored step is not done
             next_state = self.memory[-1][3]
-            G += (self.gamma ** len(self.memory)) * np.max(self.Q_matrix[next_state])
+            G += self.gamma_powers[n] * np.max(self.Q_matrix[next_state])
 
         # Update Q-values for each state-action pair in the memory
-        for i in range(len(self.memory)):
+        for i in range(n):
             state, action, reward, next_state, done = self.memory[i]
             self.Q_matrix[state][action] += self.alpha * (G - self.Q_matrix[state][action])
             # Reduce the return by the discounted reward

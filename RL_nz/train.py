@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import random
-
+from agent.agent import Agent
 from environment.custom_env import CustomEnv
 from utils.plot import plot_results
 from typing import List, Tuple
@@ -37,10 +37,15 @@ def save_results(filename, data):
         writer.writerow(["Episode", "Value"])
         writer.writerows(enumerate(data, 1))
 
-def train(env: CustomEnv, agent, train_config, plot_result_flag:bool=True, result_prefix:str="") -> Tuple[List[int], List[float]]:
+def train(env: CustomEnv, 
+          agent: Agent, 
+          train_config:dict, 
+          plot_result_flag:bool=True, 
+          result_prefix:str="") -> Tuple[List[int], List[float]]:
     num_episodes = train_config['num_episodes']
     reward_list = []
     legitimate_messages_list = []
+    median_power_list = []
 
     for episode in range(num_episodes):
         env.init_state(power_level=100, time=0, message_count=0)
@@ -66,6 +71,7 @@ def train(env: CustomEnv, agent, train_config, plot_result_flag:bool=True, resul
         agent.decay_epsilon()
         reward_list.append(total_reward)
         legitimate_messages_list.append(legitimate_messages_sent_this_episode)
+        median_power_list.append(np.median(power_list))
         if plot_result_flag:
             print(f'Episode {episode+1}: Total Reward = {total_reward}, Legitimate Messages Sent = {legitimate_messages_sent_this_episode}')
                 
@@ -85,4 +91,4 @@ def train(env: CustomEnv, agent, train_config, plot_result_flag:bool=True, resul
         save_results(f'results/{result_prefix}power_list.csv', power_list)
         save_results(f'results/{result_prefix}power_list.csv', action_list)
         
-    return legitimate_messages_list, power_list
+    return legitimate_messages_list, median_power_list

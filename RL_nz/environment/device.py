@@ -1,4 +1,6 @@
-class Device:
+from environment.base_device import BaseDevice
+
+class Device(BaseDevice):
     _power_current: float
     _power_max: float
     _power_idle: float
@@ -21,6 +23,8 @@ class Device:
         self._power_transmit = power_transmit
         self._power_collect = power_collect
         self._rounding_factor = rounding_factor
+        
+        # Message queue parameters
         self._message_queue_length = 0
         self._max_message_queue_length = 5
         
@@ -70,7 +74,6 @@ class Device:
     def set_message_queue_length(self, message_count: int) -> None:
         """ Sets the message queue length """
         self._message_queue_length = message_count
-
     
     def add_power(self, power: float) -> None:
         """ Adds power to the current power level """

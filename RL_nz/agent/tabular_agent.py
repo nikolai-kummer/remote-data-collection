@@ -27,19 +27,47 @@ class TabularAgent(Agent):
         self.gamma_powers = self.gamma ** np.arange(self.n_step + 1)
         self.Q_matrix = np.random.uniform(low=-0.01, high=0.01, size=(self.N_STATES, self.N_ACTIONS))
         self.memory = deque(maxlen=self.n_step)
+        
+        self.num_power_bins = config.get('num_power_bins', env.N_POWER_LEVELS)
+        self.num_time_bins = config.get('num_time_bins', env.N_TIME_INTERVALS)
+        self.num_queue_bins = config.get('num_queue_bins', env.MAX_MESSAGES)
+        
+        # set the environment to return unnormalized state
+        env.normalize_state = False
+        
+    def process_state(self, state):
+        """
+        Checks if state is already an integer (discrete) or a vector,
+        and converts a vector state to a discrete index.
+        """
+        if isinstance(state, (int, np.integer)):
+            return state
+        else:
+            # Assume state is a vector; discretize it.
+            return self.discretize_state(state)
+
+    def discretize_state(self, state_vector):
+        # Turn the state vector of [power, time, queue] into an integer index
+        return int(state_vector[0]) * (self.num_time_bins * self.num_queue_bins) + int(state_vector[1]) * self.num_queue_bins + int(state_vector[2])
 
     def select_action(self, state):
+        state = self.process_state(state)
         if np.random.rand() < self.epsilon:
             return np.random.randint(0, self.N_ACTIONS - 1)
         else:
             return numba_argmax(self.Q_matrix[state])
         
     def store_step(self, state, action, reward, next_state, done):
+        state = self.process_state(state)
+        next_state = self.process_state(next_state)
         self.memory.append((state, action, reward, next_state, done))
         if done or len(self.memory) == self.n_step:
             self.update_q_values()
+        
 
     def update_q_value(self, state, action, reward, next_state):
+        state = self.process_state(state)
+        next_state = self.process_state(next_state)
         self.store_step(state, action, reward, next_state, done=False)
         
     def update_q_values(self):

@@ -20,18 +20,20 @@ if __name__=='__main__':
     # Initialize environment and agent
     agent = TabularAgent(config['agent'], env)
 
-
+    total_message_list = []
     for episode in range(config['train']['num_episodes']):
         observation, info = env.reset()
         total_reward = 0
         done = False
         action_list = []
+        total_messages = 0
         while not done:
             action = agent.select_action(observation)
             action_list.append(action)
             
             # Environment processes the action and returns a new observation, reward, etc.
             observation_next, reward, terminated, truncated, info = env.step(action)
+            total_messages += info['messages_sent']
             done = terminated or truncated
             
             # Agent updates its Q-values using the experience
@@ -43,7 +45,8 @@ if __name__=='__main__':
             # Update current observation for next step
             observation = observation_next
         agent.decay_epsilon()
-        print(f"Episode {episode+1}: Total Reward = {total_reward}")
+        total_message_list.append(total_messages)
+        print(f"Episode {episode+1}: Total Reward = {total_reward}, Total Messages = {total_messages}, Epsilon = {agent.epsilon}")
   
     print('Complete')
     

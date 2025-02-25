@@ -16,17 +16,22 @@ class CustomGymEnv(gym.Env):
     The environment uses an injected device (an instance of a class inheriting from BaseDevice)
     to handle power and action logic.
     """
-    def __init__(self, config, device):
+    def __init__(self, 
+                 config, 
+                 device,
+                 normalize_state: bool = False):
+        """Initializes the environment with the given configuration and device."""
         super().__init__()
         
         # Environment configuration
         self.N_TIME_INTERVALS = config['time_intervals']
+        self.N_POWER_LEVELS = config['power_levels']
+        self.MAX_MESSAGES = config['max_messages']
         self.N_DAYS = config['n_days']
         self.action_list = config['action_list']
         self.N_ACTIONS = len(self.action_list)
-        self.N_POWER_LEVELS = config['power_levels']
-        self.MAX_MESSAGES = config['max_messages']
         self.cloudy_chance = config.get('cloudy_chance', 0.8)
+        self.normalize_state = normalize_state
         
         # Define Gymnasium action and observation spaces
         self.action_space = spaces.Discrete(self.N_ACTIONS)
@@ -55,7 +60,7 @@ class CustomGymEnv(gym.Env):
         self._missed_messages = 0
         self._device.set_message_queue_length(0)
         
-        observation = self.encode_state()
+        observation = self.get_state_vector()
         return observation, {}
 
 
@@ -90,7 +95,7 @@ class CustomGymEnv(gym.Env):
         self._time = (self._time + 1) % self.N_TIME_INTERVALS
         
         # Encode state to form the observation
-        observation = self.encode_state()
+        observation = self.get_state_vector()
         
         # Define a reward (here we use messages sent as a simple reward; adjust as needed)
         reward = messages_sent - lost_penalty
@@ -104,6 +109,13 @@ class CustomGymEnv(gym.Env):
                 'device_power': self.get_power(),
                 'time': self._time_step,}
         return observation, reward, terminated, truncated, info
+
+    def get_state_vector(self):
+        """Returns the current state as a vector of power, time, and message queue length."""
+        if self.normalize_state:
+            return [self.get_power() / 100, self._time / self.N_TIME_INTERVALS, self._device._message_queue_length / self.MAX_MESSAGES]
+        else:
+            return [self.get_power(), self._time, self._device._message_queue_length]
 
     def encode_state(self):
         return self._encode_state(self.get_power(), self._time, self._device._message_queue_length)

@@ -14,7 +14,7 @@ from utils.yaml_helper import load_config
 
 if __name__=='__main__':
     config = load_config('solar_config.yaml')
-    device = Device()
+    device = Device(power_max=config['env']['max_power'], rounding_factor=(100/config['env']['power_levels']))
     env = CustomGymEnv(config['env'], device)
     
     # Initialize environment and agent
@@ -26,6 +26,7 @@ if __name__=='__main__':
         total_reward = 0
         done = False
         action_list = []
+        device_power = []
         total_messages = 0
         while not done:
             action = agent.select_action(observation)
@@ -44,9 +45,10 @@ if __name__=='__main__':
             
             # Update current observation for next step
             observation = observation_next
+            device_power.append(device._power_current)
         agent.decay_epsilon()
         total_message_list.append(total_messages)
-        print(f"Episode {episode+1}: Total Reward = {total_reward}, Total Messages = {total_messages}, Epsilon = {agent.epsilon}")
+        print(f"Episode {episode:4d}: Total Reward = {total_reward:10.3f}, Total Messages = {total_messages}, Epsilon = {agent.epsilon:5.6f}")
   
     print('Complete')
     

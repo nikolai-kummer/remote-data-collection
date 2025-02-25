@@ -35,9 +35,11 @@ class CustomGymEnv(gym.Env):
         
         # Define Gymnasium action and observation spaces
         self.action_space = spaces.Discrete(self.N_ACTIONS)
-        self.observation_space = spaces.Discrete(self.N_TIME_INTERVALS * self.MAX_MESSAGES * self.N_POWER_LEVELS)
+        self.observation_space = spaces.Box(low=0.0, high=1.0, shape=(3,), dtype=np.float32)
         self._device = device
-        self.missed_message_penalty = config.get('missed_message_penalty', 1.5)
+        self.message_reward = config.get('message_reward', 1.0)
+        self.missed_message_penalty = config.get('missed_message_penalty', -1.5)
+        self.power_reward = config.get('power_reward', 0.0001)
         
         
         # Internal counters
@@ -72,19 +74,10 @@ class CustomGymEnv(gym.Env):
         
         
         lost_penalty = 0
-        # For the 'collect' action, check if the queue is already full.
-        if action == 1:
-            prev_queue = self._device._message_queue_length
-            messages_sent = self._device.take_action(action)
-            # If the queue was full, then the new message cannot be queued and is lost.
-            if prev_queue >= self.MAX_MESSAGES:
-                lost_penalty = self.missed_message_penalty
-                self._missed_messages += 1
-        elif action == 0:
-            messages_sent = self._device.take_action(action)
+        if action == 0 or self._device._message_queue_length >= self.MAX_MESSAGES:
             lost_penalty = self.missed_message_penalty
-        else:
-            messages_sent = self._device.take_action(action)
+            self._missed_messages += 1
+        messages_sent = self._device.take_action(action)
         
         
         # Add solar power based on current time and day type.
@@ -98,7 +91,7 @@ class CustomGymEnv(gym.Env):
         observation = self.get_state_vector()
         
         # Define a reward (here we use messages sent as a simple reward; adjust as needed)
-        reward = messages_sent - lost_penalty
+        reward = messages_sent + lost_penalty + self.power_reward * self.get_power()
         
         # For now, the episode termination logic is left as False (continuous task).
         self._time_step += 1

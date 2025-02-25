@@ -2,11 +2,14 @@ env:
   max_power: 1300
   min_power: 0
   n_days: 20
-  time_intervals: 48
   action_list: ['sleep', 'collect', 'send all']
+  time_intervals: 48
   max_messages: 5
   power_levels: 100
   cloudy_chance: 0.8
+  message_reward: 1.0
+  missed_message_penalty: -1.5
+  power_reward: 0.0001
 
 agent:
   n_step: 5

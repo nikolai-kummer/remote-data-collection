@@ -13,10 +13,10 @@ agent:
   alpha: 0.1
   gamma: 0.9
   epsilon: 1.0
-  epsilon_decay: 0.996
+  epsilon_decay: 0.99
 
 train:
-  num_episodes: 3000
+  num_episodes: 1500
   reward_power_loss: 0.0
   reward_power_multiplier: 0.0001
   reward_action_0: -0.5885436726404254

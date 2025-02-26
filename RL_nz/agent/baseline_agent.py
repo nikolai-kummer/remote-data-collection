@@ -1,6 +1,7 @@
 from agent.agent import Agent
 
 class BaselineAgent(Agent):
+    epsilon = 0.0
     def __init__(self, config, env):
         self.N_ACTIONS = env.N_ACTIONS
         self.repeat_action1 = config.get("repeat_action1", 1)

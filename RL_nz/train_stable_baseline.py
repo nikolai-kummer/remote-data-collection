@@ -18,31 +18,32 @@ def main():
     # Create an instance of your device.
     # Ensure that 'max_power' is provided in your env config or use a default value.
     env_config = config['env']
-    max_power = env_config.get('max_power', 2100.0)
-    device = Device(power_max=max_power, rounding_factor=10)
+    max_power = env_config.get('max_power', 1300.0)
+    device = Device(power_max=config['env']['max_power'], rounding_factor=(100/config['env']['power_levels']))
     
-    # Create your Gymnasium environment and inject the device.
-    env = CustomGymEnv(env_config, device)
+    # Create Gymnasium environment, inject the device, and normalize state for DQN.
+    env = CustomGymEnv(env_config, device, normalize_state=True)
     
     # Wrap the environment with Monitor to log episode rewards and optionally record videos.
     log_dir = "./logs/"
     checkpoint_dir = "./checkpoints2/"
-    os.makedirs(log_dir, exist_ok=True)
-    os.makedirs(checkpoint_dir, exist_ok=True)
+    tb_log_dir = "./tensorboard/"
+    for directory in [log_dir, checkpoint_dir, tb_log_dir]:
+        os.makedirs(directory, exist_ok=True)
     env = Monitor(env, log_dir)
+    env.normalize_state = True
     
     # Create the DQN model with an MLP policy.
-    tb_log_dir = "./tensorboard/"
-    os.makedirs(tb_log_dir, exist_ok=True)
     
-    policy_kwargs = dict(net_arch=[32])
+    policy_kwargs = dict(net_arch=[32, 32])
     model = DQN("MlpPolicy", 
                 env, 
                 tensorboard_log=tb_log_dir,
-                # policy_kwargs=policy_kwargs,
+                policy_kwargs=policy_kwargs,
                 batch_size=64,
                 verbose=1,
                 learning_rate=1e-4,
+                exploration_fraction=0.1,
                 learning_starts=1000)
     
     # Define the total timesteps for training.

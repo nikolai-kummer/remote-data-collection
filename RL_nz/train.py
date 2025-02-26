@@ -3,6 +3,7 @@ import numpy as np
 import random
 from agent.agent import Agent
 from environment.custom_env import CustomEnv
+from environment.gym_environment import CustomGymEnv
 from utils.plot import plot_results
 from typing import List, Tuple
 
@@ -92,3 +93,83 @@ def train(env: CustomEnv,
         save_results(f'results/{result_prefix}power_list.csv', action_list)
         
     return legitimate_messages_list, median_power_list
+
+
+def train_gymnasium(env: CustomGymEnv, 
+                    agent, 
+                    train_config, 
+                    plot_result_flag=True, 
+                    result_prefix="",
+                    verbose: bool=False) -> Tuple[List[int], List[float]]:
+    """
+    Trains the given agent in the provided environment.
+    
+    Parameters:
+      env: A Gymnasium environment.
+      agent: The agent to train. It must implement select_action, update_q_value, and decay_epsilon.
+      train_config: A dictionary containing training parameters, e.g., num_episodes.
+      plot_result_flag: If True, plot results at the end.
+      result_prefix: A string prefix used for labeling plots or saving results.
+      
+    Returns:
+      total_message_list: A list of total messages sent per episode.
+      power_list: A list of power values observed over all episodes.
+    """
+    num_episodes = train_config.get('num_episodes', 1000)
+    total_message_list = []
+    power_list = []
+
+    for episode in range(num_episodes):
+        # Reset the environment; Gymnasium returns (observation, info)
+        obs, info = env.reset()
+        episode_reward = 0.0
+        episode_messages = 0
+        episode_power = []
+        done = False
+        
+        while not done:
+            # Agent selects an action based on current observation.
+            action = agent.select_action(obs)
+            # Environment executes the action.
+            obs_next, reward, terminated, truncated, info = env.step(action)
+            done = terminated or truncated
+            
+            # Update agent using the experience.
+            agent.update_q_value(obs, action, reward, obs_next)
+            
+            # Accumulate statistics.
+            episode_reward += reward
+            episode_messages += info.get('messages_sent', 0)
+            episode_power.append(info.get('device_power', 0))
+            
+            # Move to the next state.
+            obs = obs_next
+
+        # Decay epsilon after each episode.
+        agent.decay_epsilon()
+        
+        total_message_list.append(episode_messages)
+        power_list.extend(episode_power)
+        if verbose:
+            print(f"Episode {episode+1:3d}: Total Reward = {episode_reward:7.3f}, "
+                f"Messages = {episode_messages}, Epsilon = {agent.epsilon:7.6f}")
+    
+    if plot_result_flag:
+        # Plot total messages per episode.
+        plt.figure(figsize=(12, 6))
+        plt.subplot(1, 2, 1)
+        plt.plot(total_message_list, marker='o')
+        plt.title(result_prefix + "Total Messages per Episode")
+        plt.xlabel("Episode")
+        plt.ylabel("Messages")
+        
+        # Plot power over time (aggregated over all episodes).
+        plt.subplot(1, 2, 2)
+        plt.plot(power_list, marker='.')
+        plt.title(result_prefix + "Device Power over Time")
+        plt.xlabel("Time Step")
+        plt.ylabel("Power")
+        plt.tight_layout()
+        plt.show()
+    
+    return total_message_list, power_list

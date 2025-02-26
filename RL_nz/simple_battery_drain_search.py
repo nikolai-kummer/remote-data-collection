@@ -5,47 +5,47 @@ import yaml
 from skopt import gp_minimize
 from skopt.space import Real, Integer
 from skopt.utils import use_named_args
-from train import train, set_seed
+
+from train import train_gymnasium, set_seed  # assume set_seed is defined
 from agent.tabular_agent import TabularAgent
-from environment.custom_env import CustomEnv
+from environment.gym_environment import CustomGymEnv
+from environment.device import Device
+from utils.yaml_helper import load_config
 
 
 def main():
     # Load base configuration
-    with open('simple_battery_drain_optimum.yaml', 'r') as f:
-        config = yaml.safe_load(f)
+    config = load_config('simple_battery_drain_optimum.yaml')
 
     # Define the search space
-    space = [
-        Integer(1000, 5000,  name='num_episodes'),
-        Real(-15.0, 0.0, name='reward_power_loss'),
-        Real(0.0001, 0.01, name='reward_power_multiplier'),
-        Real(-2.0, 2.0, name='reward_action_0'),
-        Real(-2.0, 2.0, name='reward_action_1'),
-        Real(-2.0, 2.0, name='reward_action_2'),
-        Real(0.1, 3.0, name='reward_message_count')
+    search_space = [
+        Real(-10.0, 10.0, name='message_reward'),
+        Real(-10.0, 10.0, name='missed_message_penalty'),
+        Real(-1.0, 1.0, name='power_reward')
     ]
     
-    @use_named_args(space)
+    @use_named_args(search_space)
     def objective(**params):
         start_time = time.time()
-        
-        # Run the training process multiple times to reduce noise
         message_counts = []
-        for i in range(4):
+        n_runs = 4
+        for i in range(n_runs):
             # Set the seed for reproducibility
             set_seed(42 + i)  # Vary the seed slightly for each run
             
             # Update the train config with the current set of parameters
-            config['train'].update(params)
+            config['env'].update(params)
             
-            # Initialize environment and agent
-            env = CustomEnv(config['env'])
+            # Create the device and Gymnasium environment.
+            device = Device(power_max=config['env']['max_power'], 
+                            rounding_factor=(100 / config['env']['power_levels']))
+            env = CustomGymEnv(config['env'], device, normalize_state=False)
             agent = TabularAgent(config['agent'], env)
-
-            # Start training
             env.cloudy_chance = 1.0
-            message_count_list,_ = train(env, agent, config['train'], plot_result_flag=False)
+            
+            
+            # Run training using the Gymnasium training function.
+            message_count_list, _ = train_gymnasium(env, agent, config['train'], plot_result_flag=False, verbose=False)
             message_counts.append(message_count_list[-1])
         
         # Calculate the median of the message counts
@@ -54,13 +54,13 @@ def main():
         elapsed_time = time.time() - start_time
         print(f'Median Sent Messages: {median_message_count} -> Time Elapsed: {elapsed_time:.2f} seconds -> Parameters: {params}')
         # Append parameters to a CSV file
-        with open('parameters.csv', 'a') as f:
+        with open('drain_parameters.csv', 'a') as f:
             f.write(str(median_message_count) + ',' + ','.join(str(params[param]) for param in params) + ',' + '\n')
         # We want to maximize the number of sent messages
         return -median_message_count  # Negative because gp_minimize minimizes the function
     
     # Perform Bayesian Optimization
-    result = gp_minimize(objective, space, n_calls=400, random_state=0)
+    result = gp_minimize(objective, search_space, n_calls=900, random_state=0)
     
     print(f'Best Parameters: {result.x} -> Highest Sent Messages: {-result.fun}')
 

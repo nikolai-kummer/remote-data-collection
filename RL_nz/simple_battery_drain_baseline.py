@@ -1,10 +1,10 @@
 from copy import deepcopy
-from train import train
+from train import train_gymnasium
 from agent.baseline_agent import BaselineAgent
 from agent.tabular_agent import TabularAgent
 from utils.yaml_helper import load_config
-from environment.custom_env import CustomEnv
-
+from environment.gym_environment import CustomGymEnv
+from environment.device import Device
 # Function for the simple battery drain baseline experiment
 
 if __name__ == "__main__":
@@ -30,8 +30,12 @@ if __name__ == "__main__":
     
     for config, prefix, agent_class in zip(config_list, prefix_list, agent_list):
         # Initialize environment and agent
-        env = CustomEnv(config['env'])
+        device = Device(
+            power_max=config['env']['max_power'],
+            rounding_factor=(100 / config['env']['power_levels'])
+        )
+        env = CustomGymEnv(config['env'], device, normalize_state=False)
         env.cloudy_chance = 1.0
         
         agent = agent_class(config['agent'], env)
-        train(env, agent, config['train'], plot_result_flag=True, result_prefix=prefix)
+        train_gymnasium(env, agent, config['train'], plot_result_flag=True, result_prefix=prefix)

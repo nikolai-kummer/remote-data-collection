@@ -91,7 +91,7 @@ class CustomGymEnv(gym.Env):
         observation = self.get_state_vector()
         
         # Define a reward (here we use messages sent as a simple reward; adjust as needed)
-        reward = messages_sent + lost_penalty + self.power_reward * self.get_power()
+        reward = messages_sent*self.message_reward + lost_penalty + self.power_reward * self.get_power()
         
         # For now, the episode termination logic is left as False (continuous task).
         self._time_step += 1

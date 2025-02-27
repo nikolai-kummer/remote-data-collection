@@ -2,6 +2,9 @@
 #define MESSAGEPAYLOAD_H
 
 #include <Arduino.h>
+#include "BatteryManager.h"
+#include "GPSManager.h"
+#include "TimerHelper.h"
 
 class MessagePayload {
 public:
@@ -17,6 +20,7 @@ public:
     int last_state;
 
     MessagePayload();
+    MessagePayload(BatteryManager& batteryManager, GPSManager& gpsManager, TimerHelper& timeHelper, int lastState);
     String toString();
 };
 

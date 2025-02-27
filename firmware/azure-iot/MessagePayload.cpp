@@ -16,6 +16,27 @@ MessagePayload::MessagePayload() {
     gps_alt = 0.0;
 }
 
+MessagePayload::MessagePayload(BatteryManager& batteryManager, GPSManager& gpsManager, TimerHelper& timeHelper, int lastState) {
+    acc_x = 0.0 / 10.0;
+    acc_y = 0.0 / 10.0;
+    acc_z = 0.0 / 10.0;
+
+    bat = batteryManager.getLastCharge();
+    volt = batteryManager.getLastVoltage();
+    timestamp = timeHelper.getFormattedTime();
+    last_state = lastState;
+
+    gps_lat = 0.0;
+    gps_lon = 0.0;
+    gps_alt = 0.0;
+
+    if (gpsManager.hasValidLocation()) {
+        gps_lat = gpsManager.getLastLatitude() / 10000000.0;
+        gps_lon = gpsManager.getLastLongitude() / 10000000.0;
+        gps_alt = gpsManager.getLastAltitude() / 1000.0;
+    }
+}
+
 String MessagePayload::toString() {
     //TODO: Do we want to send the default values if the values are not set?
     String payload = "{";

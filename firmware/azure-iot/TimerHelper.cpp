@@ -53,3 +53,13 @@ int TimerHelper::getHalfHourInterval() {
     return halfHourInterval;
 }
 
+int TimerHelper::calculateSleepMinutes() {
+    int minutesPastHour = _rtc.getMinutes(); // Directly get the current minute from RTC
+
+    // Calculate how many minutes remain until the next half-hour (either 00 or 30)
+    int minutesUntilNextInterval = 30 - (minutesPastHour % 30);
+
+    // Ensure we sleep at least 1 minute (avoid 0-minute sleep)
+    return max(minutesUntilNextInterval, 1);
+}
+

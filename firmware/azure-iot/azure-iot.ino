@@ -10,6 +10,8 @@
 #include "WiFiManager.h"
 #include "AzureIoTManager.h"
 #include "MessageManager.h"
+#include "UtilityManager.h"  // Include the new PMICManager class
+
 
 #include "arduino_secrets.h"
 
@@ -25,6 +27,7 @@ MessageManager messageManager(timeHelper);
 AgentHelper agentHelper(100,48, 5); // 100 power levels, 48 time divisions (every 30 mintues), 5 messages max buffer
 uint8_t GPS_POWER_PIN = 7;
 GPSManager gpsManager(GPS_POWER_PIN);
+UtilityManager utilityManager;
 
 #include "./iotc_dps.h" // this one is not really used, because the device is already provisioned via python script
 
@@ -45,49 +48,6 @@ SystemState currentState = SENDING_TELEMETRY; // Initial state
 int lastState = 0;
 unsigned long startTime;
 
-String createMessagePayload() {
-    MessagePayload payload;
-    payload.acc_x = 0.0 / 10.0;
-    payload.acc_y = 0.0 / 10.0;
-    payload.acc_z = 0.0 / 10.0;
-    payload.gps_lat =  0.0 / 10.0; // Example coordinates
-    payload.bat = batteryManager.getLastCharge();
-    payload.volt = batteryManager.getLastVoltage();
-    payload.timestamp = timeHelper.getFormattedTime();
-    payload.last_state = lastState;
-
-    // Set GPS data in payload
-    if (gpsManager.hasValidLocation()) {
-        payload.gps_lat = gpsManager.getLastLatitude() / 10000000.0; // Convert to decimal degrees
-        payload.gps_lon = gpsManager.getLastLongitude() / 10000000.0; // Convert to decimal degrees
-        payload.gps_alt = gpsManager.getLastAltitude() / 1000.0; // TODO: not sure about this conversion factor, but am leaving it in
-    }
-
-    return payload.toString();
-}
-
-void resetPMICWatchdog() {
-    // Reset the watchdog timer
-    PMIC.begin();
-    PMIC.resetWatchdog();
-    PMIC.end();
-}
-
-void setupPMIC() {
-    // Start the Power Management IC and disable a bunch of power hoggers
-    if (!PMIC.begin()) {
-        Serial.println("Failed to initialize PMIC");
-        return;
-    }
-
-    if (!PMIC.disableWatchdog()) { // Disable the watchdog timer starts blinking the LED after a while
-        Serial.println("Failed to disable watchdog");
-    }
-    if (!PMIC.disableBATFET()) { // Disable the battery charging
-        Serial.println("Failed to disable charging");
-    }
-    PMIC.end();
-}
 
 void switchTolowPower(){
     // Function to switch the various components to low power mode
@@ -138,7 +98,7 @@ void collectTelemetry(){
         Serial.println(F("[collectTelemetry] - GPS not ready!"));
     }
 
-    String payload = createMessagePayload();
+    String payload = MessagePayload(batteryManager, gpsManager, timeHelper, lastState).toString();
     messageManager.addMessage(payload);
 }
 
@@ -189,7 +149,6 @@ void collectAndSendTelemetry() {
     timeHelper.pause(MINIMUM_TELEMETRY_SEND_DURATION, startTime);
 }
 
-
 void setup() {
     if (debugFlag) {
         // Accelerate the cycle for debugging
@@ -204,7 +163,7 @@ void setup() {
     timeHelper.pause(20000); 
     Serial.println("20 seconds elapsed.");
 
-    setupPMIC();
+    utilityManager.setupPMIC();
 
     // Print random state->action pairs to validate that the model is decoded correctly
     int statesToTest[] = {0,1,2,15,16,258, 2000, 3000, 20000, 20001, 24740};
@@ -264,13 +223,13 @@ void loop() {
             currentState = COLLECTING_TELEMETRY;
             break;
     }
+    SLEEP_DURATION_MINUTES = timeHelper.calculateSleepMinutes();
     timeHelper.pause(100);
     switchTolowPower();
-
     Serial.println(("Sleeping ..."));
     for (int i = 0; i < SLEEP_DURATION_MINUTES; i++) {
         LowPower.deepSleep(DEEP_SLEEP_STEP_DURATION_MILLIS);
-        resetPMICWatchdog();
+        utilityManager.resetPMICWatchdog();
     }
     delay(50); // Small delay to prevent looping too quickly
 }

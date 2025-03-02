@@ -48,12 +48,12 @@ class TabularAgent(Agent):
 
     def discretize_state(self, state_vector):
         # Turn the state vector of [power, time, queue] into an integer index
-        return int(state_vector[0]) * (self.num_time_bins * self.num_queue_bins) + int(state_vector[1]) * self.num_queue_bins + int(state_vector[2])
+        return int(state_vector[0]) * (self.num_time_bins * self.num_queue_bins) + int(state_vector[1] * self.num_queue_bins) + int(state_vector[2])
 
     def select_action(self, state):
         state = self.process_state(state)
         if np.random.rand() < self.epsilon:
-            return np.random.randint(0, self.N_ACTIONS - 1)
+            return np.random.randint(0, self.N_ACTIONS)
         else:
             return numba_argmax(self.Q_matrix[state])
         

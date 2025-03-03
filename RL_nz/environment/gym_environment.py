@@ -1,5 +1,6 @@
 import gymnasium as gym
 
+from environment.base_device import BaseDevice
 from gymnasium import spaces
 import numpy as np
 
@@ -19,7 +20,8 @@ class CustomGymEnv(gym.Env):
     def __init__(self, 
                  config, 
                  device,
-                 normalize_state: bool = False):
+                 normalize_state: bool = False,
+                 use_reward_shaping: bool = False):
         """Initializes the environment with the given configuration and device."""
         super().__init__()
         
@@ -32,15 +34,24 @@ class CustomGymEnv(gym.Env):
         self.N_ACTIONS = len(self.action_list)
         self.cloudy_chance = config.get('cloudy_chance', 0.8)
         self.normalize_state = normalize_state
+        self.use_reward_shaping = use_reward_shaping
         
         # Define Gymnasium action and observation spaces
         self.action_space = spaces.Discrete(self.N_ACTIONS)
         self.observation_space = spaces.Box(low=0.0, high=1.0, shape=(3,), dtype=np.float32)
-        self._device = device
+        self._device: BaseDevice = device
+
+        # Reward parameters - Messsage Based
         self.message_reward = config.get('message_reward', 1.0)
         self.missed_message_penalty = config.get('missed_message_penalty', -1.5)
         self.power_reward = config.get('power_reward', 0.0001)
-        
+
+        # Reward shaping parameters
+        self.reward_power_multiplier: float = config.get('reward_power_multiplier', 0.0001)
+        self.reward_action_0: float = config.get('reward_action_0', -2.0)
+        self.reward_action_1: float = config.get('reward_action_1', -0.7353431237036132)
+        self.reward_action_2: float = config.get('reward_action_2', -0.5885436726404254)
+        self.reward_message_count: float = config.get('reward_message_count', 0.8863782281442544)
         
         # Internal counters
         self._time = 0
@@ -65,6 +76,18 @@ class CustomGymEnv(gym.Env):
         observation = self.get_state_vector()
         return observation, {}
 
+    def _get_shaped_reward(self, action:int, messages_sent:int):
+        action_reward = 0
+        if action == 0:
+            action_reward = self.reward_action_0
+        elif action == 1:
+            action_reward = self.reward_action_1
+        elif action == 2:
+            action_reward = self.reward_action_2
+        else:
+            raise ValueError(f"Invalid action: {action}")
+        return action_reward + messages_sent * self.reward_message_count + self.get_power() * self.reward_power_multiplier
+
 
     def step(self, action):
         """Executes one time step within the environment using the given action."""
@@ -78,8 +101,7 @@ class CustomGymEnv(gym.Env):
             lost_penalty = self.missed_message_penalty
             self._missed_messages += 1
         messages_sent = self._device.take_action(action)
-        
-        
+                
         # Add solar power based on current time and day type.
         generated_power = get_solar_intensity(self._time, self.current_day)
         self._device.add_power(generated_power)
@@ -91,7 +113,10 @@ class CustomGymEnv(gym.Env):
         observation = self.get_state_vector()
         
         # Define a reward (here we use messages sent as a simple reward; adjust as needed)
-        reward = messages_sent*self.message_reward + lost_penalty + self.power_reward * self.get_power()
+        if self.use_reward_shaping:
+            reward = self._get_shaped_reward(action, messages_sent)
+        else:
+            reward = messages_sent* self.message_reward + lost_penalty + self.get_power() * self.power_reward
         
         # For now, the episode termination logic is left as False (continuous task).
         self._time_step += 1

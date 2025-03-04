@@ -14,7 +14,7 @@ if __name__ == "__main__":
     agent_list = []
     
     agent_config = load_config('simple_battery_drain_optimum.yaml')
-    for k in range(5):
+    for k in range(4):
         baseline_config = deepcopy(agent_config)
         baseline_config['train']['num_episodes'] = 1
         baseline_config['agent']['repeat_action1'] = k

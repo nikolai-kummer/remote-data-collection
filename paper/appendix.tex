@@ -38,6 +38,7 @@ First Author\upstairs{\affilone,*}, Second Author\upstairs{\affilone}, Third Aut
 This is an appendix of additional material that we don't have room to put into the paper.
 This material will allow us to expand if needed and is here to test our own understanding of the the underlying mechanisms.
 
+
 \end{abstract}
 
 % add your keywords
@@ -48,7 +49,29 @@ Internet of Things (IoT), Reinforcement Learning, Cattle Monitoring.
 
 \section{Simple Battery Drain Baseline}
 An initial experiment to verify that an agent is capable of learning involved a simple battery drain test.
+The purpose was to check the agents' ability to learna long-term strategy.
+It is simple enough to take early rewards, but in a battery drain test, the agent must learn to balance short-term rewards with long-term goals and conserve energy.
 The battery was fully charged and the agent was run for as long as needed to discharge the battery while trying to maximize message collection/transmission.
+The power was discretized into 400 power levels, the day was divided into 48 time steps, and the maxmimum message queue size was 5 messages and ran for 6 days until the battery was drained.
+
+\subsection{Agent Tuning}
+
+There were two optimizatiosn performed to tune the agent.
+The first optimization involved the hyper paper tuning of alpha, gamma, epsilon, epsilon decay, $n\_steps$, episode count with rewards of 1.0 per send message and \-1.5 per lost message and 0.0001 of power multiplier.
+The second optimization was a reward shaping optimization and tuned rewards for performing each action, the power multiplier, and the reward for sending a message.
+
+The hyperparameter tuning resulted with various parameters where the agent reached a maximum message count of 230.
+It would appear that the agent was not able to learn a long-term strategy and was only able to learn a short-term strategy for reward maximization.
+
+The reward shaping optimization resulted in an agent with a maximum message count of 253.
+The agent was able to learn a long-term strategy and was able to balance short-term rewards with long-term goals.
+The agent appears to need intermediate rewards to learn a long-term strategy.
+The followin parameters were found: power reward =0.000, Action0=-1.17324902,Action1=-0.463915495, Action2=-2, PerMessage=	0.602358605
+
+
+
+\subsection{Battery Drain Test Results}
+
 The agent was compared to a simple baseline static stragy of alternating transmission and collection.
 The baseline strategies are as follows:
 \begin{itemize}
@@ -75,7 +98,7 @@ The baseline strategies are as follows:
 \end{table}
 
 The results are shown in Table \ref{tab:batter_drain_result}.
-The baseline is able to send the most messages if it collects four times and sends three times.
+The baseline is able to send the most messages if it collects four times and sends once.
 This would seem like the most optimum strategy, but the static schedule gets into trouble when the battery runs out and the entire queue of messages is lost.
 The agent learns an optimal strategy of collecting four times and sending once except when the battery is low.
 In this case, the agent transmits more frequently to not lose the queue of messages.

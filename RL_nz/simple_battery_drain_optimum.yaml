@@ -6,7 +6,13 @@ env:
   action_list: ['sleep', 'collect', 'send all']
   max_messages: 5
   power_levels: 400
-  n_step: 5
+  
+  # Reward shaping parameters
+  reward_power_multiplier: 0.0001
+  reward_action_0: -0.7989065152199974
+  reward_action_1: -0.4334259356772552
+  reward_action_2: -2.0
+  reward_message_count: 0.66100996948681
 
 agent:
   n_step: 5
@@ -16,12 +22,7 @@ agent:
   epsilon_decay: 0.99
 
 train:
-  num_episodes: 1500
-  reward_power_loss: 0.0
-  reward_power_multiplier: 0.0001
-  reward_action_0: -0.5885436726404254
-  reward_action_1: -0.7353431237036132
-  reward_action_2: -2.0
-  reward_message_count: 0.8863782281442544
+  num_episodes: 5000
+
 
 #Best Parameters: [5000, 0.0, 0.0001, -1.873296736728921, -0.6489876722057264, -2.0, 0.8640073325132345] -> Highest Sent Messages: 252.0

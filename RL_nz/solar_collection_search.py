@@ -29,9 +29,9 @@ base_config = load_config('solar_config.yaml')
 
 # Define the search space
 search_space = [
-    Real(0.0, 2.0, name='message_reward'),
-    Real(-3.0, -0.0, name='missed_message_penalty'),
-    Real(-1e-2, +1e-2, name='power_reward')
+    Real(-10.0, 10.0, name='message_reward'),
+    Real(-10.0, 10.0, name='missed_message_penalty'),
+    Real(-1, +1, name='power_reward')
 ]
 
 def set_seed(seed):
@@ -61,7 +61,7 @@ def objective(**params):
     start_time = time.time()
     # We'll run several training runs and average the result to reduce noise.
     message_counts = []
-    n_runs = 3
+    n_runs = 4
     for i in range(n_runs):
         set_seed(42 + i)
         
@@ -98,5 +98,5 @@ def objective(**params):
     return -avg_median
     
 if __name__ == "__main__":
-    result = gp_minimize(objective, search_space, n_calls=50, random_state=0)
+    result = gp_minimize(objective, search_space, n_calls=800, random_state=0)
     print(f"Best Parameters: {result.x} -> Highest Sent Messages: {-result.fun}")

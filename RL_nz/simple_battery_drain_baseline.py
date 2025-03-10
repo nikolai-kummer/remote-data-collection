@@ -34,8 +34,10 @@ if __name__ == "__main__":
             power_max=config['env']['max_power'],
             rounding_factor=(100 / config['env']['power_levels'])
         )
-        env = CustomGymEnv(config['env'], device, normalize_state=False)
+        env = CustomGymEnv(config['env'], device, normalize_state=False, use_reward_shaping=True)
         env.cloudy_chance = 1.0
         
         agent = agent_class(config['agent'], env)
-        train_gymnasium(env, agent, config['train'], plot_result_flag=True, result_prefix=prefix)
+        train_gymnasium(env, agent, config['train'], plot_result_flag=True, verbose=True, result_prefix=prefix)
+        
+    print('Complete')

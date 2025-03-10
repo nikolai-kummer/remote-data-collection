@@ -19,7 +19,7 @@ train:
   num_episodes: 100
   reward_power_loss: 0.0
   reward_power_multiplier: 0.0001
-  reward_action_0: -1.7163689752956093
-  reward_action_1: -0.5999029879120295
-  reward_action_2: -1.4845465646532197
-  reward_message_count: 0.8413013889155135
+  reward_action_0: -0.937547131454824
+  reward_action_1: -0.537298539516532
+  reward_action_2: -2
+  reward_message_count: 0.800826237715038

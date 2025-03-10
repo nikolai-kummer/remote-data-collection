@@ -125,6 +125,7 @@ def train_gymnasium(env: CustomGymEnv,
         episode_reward = 0.0
         episode_messages = 0
         episode_power = []
+        action_list = []
         done = False
         
         while not done:
@@ -141,6 +142,7 @@ def train_gymnasium(env: CustomGymEnv,
             episode_reward += reward
             episode_messages += info.get('messages_sent', 0)
             episode_power.append(info.get('device_power', 0))
+            action_list.append(action)
             
             # Move to the next state.
             obs = obs_next

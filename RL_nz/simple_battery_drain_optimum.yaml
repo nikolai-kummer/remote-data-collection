@@ -15,7 +15,7 @@ env:
   reward_message_count: 0.66100996948681
 
 agent:
-  n_step: 5
+  n_step: 7
   alpha: 0.1
   gamma: 0.9
   epsilon: 1.0

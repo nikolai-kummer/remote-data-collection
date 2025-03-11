@@ -22,7 +22,7 @@ def main():
     device = Device(power_max=config['env']['max_power'], rounding_factor=(100/config['env']['power_levels']))
     
     # Create Gymnasium environment, inject the device, and normalize state for DQN.
-    env = CustomGymEnv(env_config, device, normalize_state=True)
+    env = CustomGymEnv(env_config, device, normalize_state=True, use_reward_shaping=True)
     
     # Wrap the environment with Monitor to log episode rewards and optionally record videos.
     log_dir = "./logs/"

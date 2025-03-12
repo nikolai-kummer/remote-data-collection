@@ -58,6 +58,7 @@ class CustomGymEnv(gym.Env):
         self.current_day = 0
         self._time_step = 0
         self._missed_messages = 0
+        self._total_messages = 0
         
         # Precomputed factor for state encoding
         self._power_factor = self.N_TIME_INTERVALS * self.MAX_MESSAGES
@@ -71,6 +72,7 @@ class CustomGymEnv(gym.Env):
         self._time = 0
         self._time_step = 0
         self._missed_messages = 0
+        self._total_messages = 0
         self._device.set_message_queue_length(0)
         
         observation = self.get_state_vector()
@@ -101,6 +103,7 @@ class CustomGymEnv(gym.Env):
             lost_penalty = self.missed_message_penalty
             self._missed_messages += 1
         messages_sent = self._device.take_action(action)
+        self._total_messages += messages_sent
                 
         # Add solar power based on current time and day type.
         generated_power = get_solar_intensity(self._time, self.current_day)
@@ -123,7 +126,7 @@ class CustomGymEnv(gym.Env):
         truncated = False
         terminated = self.check_completion()
         
-        info = {'messages_sent': messages_sent, 
+        info = {'messages_sent': self._total_messages, 
                 'device_power': self.get_power(),
                 'time': self._time_step,}
         return observation, reward, terminated, truncated, info

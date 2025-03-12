@@ -20,7 +20,7 @@ class TotalMessagesCallback(BaseCallback):
         infos = self.locals.get("infos", [])
         for info in infos:
             if "messages_sent" in info:
-                self.episode_messages += info["messages_sent"]
+                self.episode_messages = info["messages_sent"]
         return True
 
     def _on_rollout_end(self):

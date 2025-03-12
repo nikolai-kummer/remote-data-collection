@@ -2,13 +2,35 @@
 import os
 import numpy as np
 from stable_baselines3 import DQN
-from stable_baselines3.common.callbacks import CheckpointCallback
+from stable_baselines3.common.callbacks import BaseCallback, CheckpointCallback, CallbackList
 from stable_baselines3.common.monitor import Monitor
 from utils.yaml_helper import load_config
 from environment.device import Device
 from environment.gym_environment import CustomGymEnv
 
 # Save every 10000 steps
+
+class TotalMessagesCallback(BaseCallback):
+    def __init__(self, verbose=0):
+        super(TotalMessagesCallback, self).__init__(verbose)
+        self.episode_messages = 0
+
+    def _on_step(self) -> bool:
+        # Access the info dictionaries; these are stored in self.locals["infos"]
+        infos = self.locals.get("infos", [])
+        for info in infos:
+            if "messages_sent" in info:
+                self.episode_messages += info["messages_sent"]
+        return True
+
+    def _on_rollout_end(self):
+        # Log the total messages for the rollout (or episode, if your rollout is one episode)
+        self.logger.record("rollout/total_messages", self.episode_messages)
+        if self.verbose > 0:
+            print(f"Rollout total messages: {self.episode_messages}")
+        # Reset for next rollout
+        self.episode_messages = 0
+
 
 
 def main():
@@ -19,7 +41,8 @@ def main():
     # Ensure that 'max_power' is provided in your env config or use a default value.
     env_config = config['env']
     max_power = env_config.get('max_power', 1300.0)
-    device = Device(power_max=config['env']['max_power'], rounding_factor=(100/config['env']['power_levels']))
+    device = Device(power_max=config['env']['max_power'], 
+                    rounding_factor=(100/config['env']['power_levels']))
     
     # Create Gymnasium environment, inject the device, and normalize state for DQN.
     env = CustomGymEnv(env_config, device, normalize_state=True, use_reward_shaping=True)
@@ -51,7 +74,8 @@ def main():
     
     # Train and save the model
     checkpoint_callback = CheckpointCallback(save_freq=100000, save_path=checkpoint_dir, name_prefix='dqn_model')
-    model.learn(total_timesteps=total_timesteps, callback=checkpoint_callback)
+    total_messages_callback = TotalMessagesCallback(verbose=0)
+    model.learn(total_timesteps=total_timesteps, callback=CallbackList([checkpoint_callback, total_messages_callback]))
     model.save("dqn_custom_env")
 
 

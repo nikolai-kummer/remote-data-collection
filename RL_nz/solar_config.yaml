@@ -5,7 +5,7 @@ env:
   action_list: ['sleep', 'collect', 'send all']
   time_intervals: 48
   max_messages: 5
-  power_levels: 100
+  power_levels: 400
   cloudy_chance: 0.8
   message_reward: 1.0
   missed_message_penalty: -1.5
@@ -19,10 +19,10 @@ agent:
   epsilon_decay: 0.995
 
 train:
-  num_episodes: 3000
+  num_episodes: 5000
   reward_power_loss: 0.0
   reward_power_multiplier: 0.0001
-  reward_action_0: -1.7163689752956093
-  reward_action_1: -0.5999029879120295
-  reward_action_2: -1.4845465646532197
-  reward_message_count: 0.8413013889155135
+  reward_action_0: -0.8136981144168514
+  reward_action_1: -0.46005675376689026
+  reward_action_2: -1.4517242268429282
+  reward_message_count: 0.6404633803633006

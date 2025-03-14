@@ -21,6 +21,7 @@ class TabularAgent(Agent):
         self.gamma = config['gamma']
         self.epsilon = config['epsilon']
         self.epsilon_decay = config['epsilon_decay']
+        self.epsilon_min = config.get('epsilon_min', 0.0)
         self.N_STATES = (env.N_POWER_LEVELS+1) * (env.N_TIME_INTERVALS+1) * env.MAX_MESSAGES
         self.N_ACTIONS = env.N_ACTIONS
         self.n_step = config.get('n_step', 3)  # Number of steps to look back
@@ -99,7 +100,7 @@ class TabularAgent(Agent):
         self.Q_matrix[state][action] += self.alpha * td_error
 
     def decay_epsilon(self):
-        self.epsilon *= self.epsilon_decay
+        self.epsilon = max(self.epsilon * self.epsilon_decay, self.epsilon_min)
         
     def save_q_matrix(self, filename):
         # check if folder exists

@@ -57,7 +57,7 @@ The power was discretized into 400 power levels, the day was divided into 48 tim
 \subsection{Agent Tuning}
 
 There were two optimizatiosn performed to tune the agent.
-The first optimization involved the hyper paper tuning of alpha, gamma, epsilon, epsilon decay, $n\_steps$, episode count with rewards of 1.0 per send message and \-1.5 per lost message and 0.0001 of power multiplier.
+The first optimization involved the hyperparameter tuning of alpha, gamma, epsilon, epsilon decay, $n\_steps$, episode count with rewards of 1.0 per send message and \-1.5 per lost message and 0.0001 of power multiplier.
 The second optimization was a reward shaping optimization and tuned rewards for performing each action, the power multiplier, and the reward for sending a message.
 
 The hyperparameter tuning resulted with various parameters where the agent reached a maximum message count of 230.
@@ -66,7 +66,11 @@ It would appear that the agent was not able to learn a long-term strategy and wa
 The reward shaping optimization resulted in an agent with a maximum message count of 253.
 The agent was able to learn a long-term strategy and was able to balance short-term rewards with long-term goals.
 The agent appears to need intermediate rewards to learn a long-term strategy.
-The followin parameters were found: power reward =0.000, Action0=-1.17324902,Action1=-0.463915495, Action2=-2, PerMessage=	0.602358605
+The following parameters were found: power reward =0.000, Action0=-1.17324902,Action1=-0.463915495, Action2=-2, PerMessage=	0.602358605
+
+It is interesting that the reward shaping produced a better result than pure message count.
+The reward shaping shows the agent which actions should be rewarded to produce a better message count.
+This is likely because the gradient of rewards did not provide enough information to the agent to learn a long-term strategy for the hyper parameter tuning case.
 
 
 

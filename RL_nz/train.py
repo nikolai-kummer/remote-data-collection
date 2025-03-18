@@ -140,7 +140,7 @@ def train_gymnasium(env: CustomGymEnv,
             
             # Accumulate statistics.
             episode_reward += reward
-            episode_messages += info.get('messages_sent', 0)
+            episode_messages = info.get('messages_sent', 0)
             episode_power.append(info.get('device_power', 0))
             action_list.append(action)
             
@@ -151,7 +151,7 @@ def train_gymnasium(env: CustomGymEnv,
         agent.decay_epsilon()
         
         total_message_list.append(episode_messages)
-        power_list.extend(episode_power)
+        power_list = episode_power
         if verbose:
             print(f"Episode {episode+1:3d}: Total Reward = {episode_reward:7.3f}, "
                 f"Messages = {episode_messages}, Epsilon = {agent.epsilon:7.6f}")

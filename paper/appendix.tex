@@ -49,10 +49,10 @@ Internet of Things (IoT), Reinforcement Learning, Cattle Monitoring.
 
 \section{Simple Battery Drain Baseline}
 An initial experiment to verify that an agent is capable of learning involved a simple battery drain test.
-The purpose was to check the agents' ability to learna long-term strategy.
+The purpose was to check the agents' ability to learn a long-term strategy.
 It is simple enough to take early rewards, but in a battery drain test, the agent must learn to balance short-term rewards with long-term goals and conserve energy.
 The battery was fully charged and the agent was run for as long as needed to discharge the battery while trying to maximize message collection/transmission.
-The power was discretized into 400 power levels, the day was divided into 48 time steps, and the maxmimum message queue size was 5 messages and ran for 6 days until the battery was drained.
+The power was discretized into 400 power levels, the day was divided into 48 time steps, and the maximum message queue size was 5 messages and ran for 6 days until the battery was drained.
 
 \subsection{Agent Tuning}
 
@@ -63,15 +63,17 @@ The second optimization was a reward shaping optimization and tuned rewards for 
 The hyperparameter tuning resulted with various parameters where the agent reached a maximum message count of 230.
 It would appear that the agent was not able to learn a long-term strategy and was only able to learn a short-term strategy for reward maximization.
 
-The reward shaping optimization resulted in an agent with a maximum message count of 253.
-The agent was able to learn a long-term strategy and was able to balance short-term rewards with long-term goals.
+The reward shaping optimization resulted in an agent with a maximum message count of 253 or 252 depending on which seed is selected.
+The optimization found reward values that the agent used to come up with a strategy that happens to outperform all baselines.
 The agent appears to need intermediate rewards to learn a long-term strategy.
 The following parameters were found: power reward =0.000, Action0=-1.17324902,Action1=-0.463915495, Action2=-2, PerMessage=	0.602358605
+The agent is able to outperform the baseline because the baseline runs out of power with a full message queue and never gets to send the message. 
 
 It is interesting that the reward shaping produced a better result than pure message count.
 The reward shaping shows the agent which actions should be rewarded to produce a better message count.
 This is likely because the gradient of rewards did not provide enough information to the agent to learn a long-term strategy for the hyper parameter tuning case.
-
+This methodology isn't amazing, because we pretty much guide the agent every step of the way by giving rewards for certain actions, rather than outcomes. 
+A different approach is likely necessary to ensure that the prcess is more robust.
 
 
 \subsection{Battery Drain Test Results}

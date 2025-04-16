@@ -8,4 +8,10 @@ build/
 # VS Code directory
 .vscode/
 
+# secrets
 arduino_secrets.h
+
+# train-related logs and progress
+checkpoints*/
+logs/
+tensorboard/
